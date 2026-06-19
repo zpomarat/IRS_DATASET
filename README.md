@@ -1,1 +1,3 @@
-# RUGBY_DATASET
+# IRS_DATASET
+
+Individual Rugby Scrummaging Dataset
