@@ -1,0 +1,27 @@
+A38: 
+    code_left: "247-L"
+    code_right: "244-R"
+B44: 
+    code_left: "199-L"
+    code_right: "200-R"
+C44: 
+    code_left: "201-L"
+    code_right: "202-R"
+D46: 
+    code_left: "115-L"
+    code_right: "116-R"
+E46: 
+    code_left: "119-L"
+    code_right: "120-R"
+F46: 
+    code_left: "121-L"
+    code_right: "122-R"
+G48: 
+    code_left: "031-L"
+    code_right: "030-R"
+H48: 
+    code_left: "035-L"
+    code_right: "034-R"
+I50: 
+    code_left: "005-L"
+    code_right: "006-R"
