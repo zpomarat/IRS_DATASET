@@ -21,9 +21,9 @@ class DataForceplates:
         """
         self.path = dir_path
         self.file_name = file_name
-        self.path_xcp = self.path + self.file_name + ".xcp"
-        self.path_csv = self.path + self.file_name + ".csv"
-        self.path_c3d = self.path + self.file_name + ".c3d"
+        self.path_xcp = os.path.abspath(os.path.join(self.path,self.file_name + ".xcp"))
+        self.path_csv = os.path.abspath(os.path.join(self.path,self.file_name + ".csv"))
+        self.path_c3d = os.path.abspath(os.path.join(self.path,self.file_name + ".c3d"))
         self.frequency = frequency
         self.fp_number = fp_number
         self.raw_data = None
