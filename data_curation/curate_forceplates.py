@@ -1,10 +1,14 @@
-from DataForceplates import DataForceplates
+import sys
 import os
+
+cdir = os.getcwd()
+
+sys.path.append(os.path.abspath(os.path.join(cdir)))
+
+from shared.DataForceplates import DataForceplates
 import pandas as pd
-import yaml
 
 # Paths
-cdir = os.getcwd()
 path_forceplates = {
     "session_1": "D://DATA//MANIPS_CREPS_JUILLET_2024//forceplates//",
     "session_2": "D://DATA//MANIPS_CREPS_JANVIER_2025//forceplates//",

@@ -1,10 +1,15 @@
-from DataLoadsol import DataLoadsol
+import sys
 import os
+
+cdir = os.getcwd()
+
+sys.path.append(os.path.abspath(os.path.join(cdir)))
+
+from shared.DataLoadsol import DataLoadsol
 import pandas as pd
 import yaml
 
 # Paths
-cdir = os.getcwd()
 path_loadsol = {"session_1": "D://DATA//MANIPS_SESSION_1//insoles//",
                 "session_2": "D://DATA//MANIPS_SESSION_2//insoles//"}
 path_trials = os.path.abspath(os.path.join(cdir, "../", "data", "metadata"))
