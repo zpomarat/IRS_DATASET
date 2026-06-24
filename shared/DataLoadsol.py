@@ -170,7 +170,7 @@ class DataLoadsol:
                 int(time[2]),
             )
 
-    def read_csv(self):
+    def read_csv(self,state="raw"):
         """Reads csv file containing raw insoles data. Creates a pd.DataFrame containing the raw time and the raw data of each insole. Valid for ST players only (due to the force plates configuration during experiments at CREPS).
 
         Returns:
@@ -181,7 +181,7 @@ class DataLoadsol:
                   time_right, f_heel_r, f_medial_r, f_lateral_r, f_tot_r, acc_x_r, acc_y_r, acc_z_r, gyro_x_r, gyro_y_r, gyro_z_r.
         """
 
-        if self.csv_file_created == False:
+        if os.path.isfile(self.path_csv) == False and self.csv_file_created == False:
             self.convert_txt_to_csv()
             self.csv_file_created = True
 
@@ -189,342 +189,356 @@ class DataLoadsol:
             raise ValueError("The csv file does not exist.")
 
         # Read the csv file as a Dataframe
-        data_csv = pd.read_csv(
-            self.path_csv, sep=",", header=2, na_values="-", dtype=str
-        )
-
-        # Suppress the columns with only nan values
-        for column in data_csv.columns:
-            if data_csv[column].isna().all():
-                data_csv.drop(labels=column, axis=1, inplace=True)
-
-        # Suppres the line with units
-        data_csv.drop(0, axis=0, inplace=True)
-
-        # Remove data after the end end of the measurement
-        if "Notes" in data_csv.keys():
-            idx_end_measurement = data_csv[
-                data_csv["Notes"] == "End measurement"
-            ].index[0]
-            data_csv.drop(
-                index=range(idx_end_measurement, len(data_csv)), axis=0, inplace=True
+        if state == "raw":
+            data_csv = pd.read_csv(
+                self.path_csv, sep=",", header=2, na_values="-", dtype=str
             )
 
-            # Suppress the column "Notes" if it exists
-            data_csv.drop(labels="Notes", axis=1, inplace=True)
+            # Suppress the columns with only nan values
+            for column in data_csv.columns:
+                if data_csv[column].isna().all():
+                    data_csv.drop(labels=column, axis=1, inplace=True)
 
-        # Reset index
-        data_csv.reset_index(drop=True, inplace=True)
+            # Suppres the line with units
+            data_csv.drop(0, axis=0, inplace=True)
 
-        # Remove useless time columns (all the columns containing "Unnamed" that are not placed before a column containing "lateral" or "heel" or "medial")
-        columns_list = list(data_csv.columns)
+            # Remove data after the end end of the measurement
+            if "Notes" in data_csv.keys():
+                idx_end_measurement = data_csv[
+                    data_csv["Notes"] == "End measurement"
+                ].index[0]
+                data_csv.drop(
+                    index=range(idx_end_measurement, len(data_csv)), axis=0, inplace=True
+                )
 
-        col_to_suppress = []
+                # Suppress the column "Notes" if it exists
+                data_csv.drop(labels="Notes", axis=1, inplace=True)
 
-        keywords = {"medial", "heel", "lateral"}
+            # Reset index
+            data_csv.reset_index(drop=True, inplace=True)
 
-        # Columns to suppress are those that do not have a following column or whose following column does not contain a keyword
-        for idx, col in enumerate(columns_list):
-            if "Unnamed" in col:
-                if idx + 1 == len(columns_list) or not any(
-                    keyword in columns_list[idx + 1] for keyword in keywords
-                ):
-                    col_to_suppress.append(idx)
+            # Remove useless time columns (all the columns containing "Unnamed" that are not placed before a column containing "lateral" or "heel" or "medial")
+            columns_list = list(data_csv.columns)
 
-        data_csv.drop(data_csv.columns[col_to_suppress], axis=1, inplace=True)
+            col_to_suppress = []
 
-        # Open and read the yaml file containing the correspondance between insoles names and codes
-        cdir = os.getcwd()
+            keywords = {"medial", "heel", "lateral"}
 
-        with open(
-            os.path.abspath(os.path.join(cdir, "data_curation", "utils", "insoles_codes.yaml")), "r"
-        ) as file:
-            insoles_codes = yaml.safe_load(file)
-
-        # Rename columns names (force and IMU data)
-        for insole in self.insoles:
-            for key in data_csv.keys():
-                match key:
-                    case code_right if (
-                        insoles_codes[insole]["code_right"] in code_right
+            # Columns to suppress are those that do not have a following column or whose following column does not contain a keyword
+            for idx, col in enumerate(columns_list):
+                if "Unnamed" in col:
+                    if idx + 1 == len(columns_list) or not any(
+                        keyword in columns_list[idx + 1] for keyword in keywords
                     ):
-                        match code_right:
-                            case lat if "lateral" in lat:
-                                data_csv.rename(
-                                    columns={code_right: insole + "_f_lateral_r"},
-                                    inplace=True,
-                                )
-                            case med if "medial" in med:
-                                data_csv.rename(
-                                    columns={code_right: insole + "_f_medial_r"},
-                                    inplace=True,
-                                )
-                            case heel if "heel" in heel:
-                                data_csv.rename(
-                                    columns={code_right: insole + "_f_heel_r"},
-                                    inplace=True,
-                                )
-                            case tot if (
-                                insoles_codes[insole]["code_right"] in tot
-                                and ":" not in tot
-                            ):
-                                data_csv.rename(
-                                    columns={code_right: insole + "_f_total_r"},
-                                    inplace=True,
-                                )
-                            case xacc if "xAcc" in xacc:
-                                data_csv.rename(
-                                    columns={code_right: insole + "_acc_y_r"},
-                                    inplace=True,
-                                )
-                                # Inverse axis
-                                data_csv[insole + "_acc_y_r"] = -data_csv[
-                                    insole + "_acc_y_r"
-                                ].astype(float)
+                        col_to_suppress.append(idx)
 
-                            case yacc if "yAcc" in yacc:
-                                data_csv.rename(
-                                    columns={code_right: insole + "_acc_x_r"},
-                                    inplace=True,
-                                )
-                            case zacc if "zAcc" in zacc:
-                                data_csv.rename(
-                                    columns={code_right: insole + "_acc_z_r"},
-                                    inplace=True,
-                                )
-                            case xgyro if "xGyro" in xgyro:
-                                data_csv.rename(
-                                    columns={code_right: insole + "_gyro_y_r"},
-                                    inplace=True,
-                                )
-                                # Inverse axis
-                                data_csv[insole + "_gyro_y_r"] = -data_csv[
-                                    insole + "_gyro_y_r"
-                                ].astype(float)
+            data_csv.drop(data_csv.columns[col_to_suppress], axis=1, inplace=True)
 
-                            case ygyro if "yGyro" in ygyro:
-                                data_csv.rename(
-                                    columns={code_right: insole + "_gyro_x_r"},
-                                    inplace=True,
-                                )
-                            case zgyro if "zGyro" in zgyro:
-                                data_csv.rename(
-                                    columns={code_right: insole + "_gyro_z_r"},
-                                    inplace=True,
-                                )
-                    case insole_right if (
-                        insole in insole_right and "-R" in insole_right
-                    ):
-                        match insole_right:
-                            case lat if "lateral" in lat:
-                                data_csv.rename(
-                                    columns={insole_right: insole + "_f_lateral_r"},
-                                    inplace=True,
-                                )
-                            case med if "medial" in med:
-                                data_csv.rename(
-                                    columns={insole_right: insole + "_f_medial_r"},
-                                    inplace=True,
-                                )
-                            case heel if "heel" in heel:
-                                data_csv.rename(
-                                    columns={insole_right: insole + "_f_heel_r"},
-                                    inplace=True,
-                                )
-                            case tot if (
-                                insole in tot and "-R" in tot and ":" not in tot
-                            ):
-                                data_csv.rename(
-                                    columns={insole_right: insole + "_f_total_r"},
-                                    inplace=True,
-                                )
-                            case xacc if "xAcc" in xacc:
-                                data_csv.rename(
-                                    columns={insole_right: insole + "_acc_y_r"},
-                                    inplace=True,
-                                )
-                                # Inverse axis
-                                data_csv[insole + "_acc_y_r"] = -data_csv[
-                                    insole + "_acc_y_r"
-                                ].astype(float)
+            # Open and read the yaml file containing the correspondance between insoles names and codes
+            cdir = os.getcwd()
 
-                            case yacc if "yAcc" in yacc:
-                                data_csv.rename(
-                                    columns={insole_right: insole + "_acc_x_r"},
-                                    inplace=True,
-                                )
-                            case zacc if "zAcc" in zacc:
-                                data_csv.rename(
-                                    columns={insole_right: insole + "_acc_z_r"},
-                                    inplace=True,
-                                )
-                            case xgyro if "xGyro" in xgyro:
-                                data_csv.rename(
-                                    columns={insole_right: insole + "_gyro_y_r"},
-                                    inplace=True,
-                                )
-                                # Inverse axis
-                                data_csv[insole + "_gyro_y_r"] = -data_csv[
-                                    insole + "_gyro_y_r"
-                                ].astype(float)
+            with open(
+                os.path.abspath(os.path.join(cdir, "data_curation", "utils", "insoles_codes.yaml")), "r"
+            ) as file:
+                insoles_codes = yaml.safe_load(file)
 
-                            case ygyro if "yGyro" in ygyro:
-                                data_csv.rename(
-                                    columns={insole_right: insole + "_gyro_x_r"},
-                                    inplace=True,
-                                )
-                            case zgyro if "zGyro" in zgyro:
-                                data_csv.rename(
-                                    columns={insole_right: insole + "_gyro_z_r"},
-                                    inplace=True,
-                                )
-                    case code_left if insoles_codes[insole]["code_left"] in code_left:
-                        match code_left:
-                            case lat if "lateral" in lat:
-                                data_csv.rename(
-                                    columns={code_left: insole + "_f_lateral_l"},
-                                    inplace=True,
-                                )
-                            case med if "medial" in med:
-                                data_csv.rename(
-                                    columns={code_left: insole + "_f_medial_l"},
-                                    inplace=True,
-                                )
-                            case heel if "heel" in heel:
-                                data_csv.rename(
-                                    columns={code_left: insole + "_f_heel_l"},
-                                    inplace=True,
-                                )
-                            case tot if (
-                                insoles_codes[insole]["code_left"] in tot
-                                and ":" not in tot
-                            ):
-                                data_csv.rename(
-                                    columns={code_left: insole + "_f_total_l"},
-                                    inplace=True,
-                                )
-                            case xacc if "xAcc" in xacc:
-                                data_csv.rename(
-                                    columns={code_left: insole + "_acc_y_l"},
-                                    inplace=True,
-                                )
-                                # Inverse axis
-                                data_csv[insole + "_acc_y_l"] = -data_csv[
-                                    insole + "_acc_y_l"
-                                ].astype(float)
+            # Rename columns names (force and IMU data)
+            for insole in self.insoles:
+                for key in data_csv.keys():
+                    match key:
+                        case code_right if (
+                            insoles_codes[insole]["code_right"] in code_right
+                        ):
+                            match code_right:
+                                case lat if "lateral" in lat:
+                                    data_csv.rename(
+                                        columns={code_right: insole + "_f_lateral_r"},
+                                        inplace=True,
+                                    )
+                                case med if "medial" in med:
+                                    data_csv.rename(
+                                        columns={code_right: insole + "_f_medial_r"},
+                                        inplace=True,
+                                    )
+                                case heel if "heel" in heel:
+                                    data_csv.rename(
+                                        columns={code_right: insole + "_f_heel_r"},
+                                        inplace=True,
+                                    )
+                                case tot if (
+                                    insoles_codes[insole]["code_right"] in tot
+                                    and ":" not in tot
+                                ):
+                                    data_csv.rename(
+                                        columns={code_right: insole + "_f_total_r"},
+                                        inplace=True,
+                                    )
+                                case xacc if "xAcc" in xacc:
+                                    data_csv.rename(
+                                        columns={code_right: insole + "_acc_y_r"},
+                                        inplace=True,
+                                    )
+                                    # Inverse axis
+                                    data_csv[insole + "_acc_y_r"] = -data_csv[
+                                        insole + "_acc_y_r"
+                                    ].astype(float)
 
-                            case yacc if "yAcc" in yacc:
-                                data_csv.rename(
-                                    columns={code_left: insole + "_acc_x_l"},
-                                    inplace=True,
-                                )
-                            case zacc if "zAcc" in zacc:
-                                data_csv.rename(
-                                    columns={code_left: insole + "_acc_z_l"},
-                                    inplace=True,
-                                )
-                            case xgyro if "xGyro" in xgyro:
-                                data_csv.rename(
-                                    columns={code_left: insole + "_gyro_y_l"},
-                                    inplace=True,
-                                )
-                                # Inverse axis
-                                data_csv[insole + "_gyro_y_l"] = -data_csv[
-                                    insole + "_gyro_y_l"
-                                ].astype(float)
+                                case yacc if "yAcc" in yacc:
+                                    data_csv.rename(
+                                        columns={code_right: insole + "_acc_x_r"},
+                                        inplace=True,
+                                    )
+                                case zacc if "zAcc" in zacc:
+                                    data_csv.rename(
+                                        columns={code_right: insole + "_acc_z_r"},
+                                        inplace=True,
+                                    )
+                                case xgyro if "xGyro" in xgyro:
+                                    data_csv.rename(
+                                        columns={code_right: insole + "_gyro_y_r"},
+                                        inplace=True,
+                                    )
+                                    # Inverse axis
+                                    data_csv[insole + "_gyro_y_r"] = -data_csv[
+                                        insole + "_gyro_y_r"
+                                    ].astype(float)
 
-                            case ygyro if "yGyro" in ygyro:
-                                data_csv.rename(
-                                    columns={code_left: insole + "_gyro_x_l"},
-                                    inplace=True,
-                                )
-                            case zgyro if "zGyro" in zgyro:
-                                data_csv.rename(
-                                    columns={code_left: insole + "_gyro_z_l"},
-                                    inplace=True,
-                                )
-                    case insole_left if insole in insole_left and "-L" in insole_left:
-                        match insole_left:
-                            case lat if "lateral" in lat:
-                                data_csv.rename(
-                                    columns={insole_left: insole + "_f_lateral_l"},
-                                    inplace=True,
-                                )
-                            case med if "medial" in med:
-                                data_csv.rename(
-                                    columns={insole_left: insole + "_f_medial_l"},
-                                    inplace=True,
-                                )
-                            case heel if "heel" in heel:
-                                data_csv.rename(
-                                    columns={insole_left: insole + "_f_heel_l"},
-                                    inplace=True,
-                                )
-                            case tot if (
-                                insole in tot and "-L" in tot and ":" not in tot
-                            ):
-                                data_csv.rename(
-                                    columns={insole_left: insole + "_f_total_l"},
-                                    inplace=True,
-                                )
-                            case xacc if "xAcc" in xacc:
-                                data_csv.rename(
-                                    columns={insole_left: insole + "_acc_y_l"},
-                                    inplace=True,
-                                )
-                                # Inverse axis
-                                data_csv[insole + "_acc_y_l"] = -data_csv[
-                                    insole + "_acc_y_l"
-                                ].astype(float)
+                                case ygyro if "yGyro" in ygyro:
+                                    data_csv.rename(
+                                        columns={code_right: insole + "_gyro_x_r"},
+                                        inplace=True,
+                                    )
+                                case zgyro if "zGyro" in zgyro:
+                                    data_csv.rename(
+                                        columns={code_right: insole + "_gyro_z_r"},
+                                        inplace=True,
+                                    )
+                        case insole_right if (
+                            insole in insole_right and "-R" in insole_right
+                        ):
+                            match insole_right:
+                                case lat if "lateral" in lat:
+                                    data_csv.rename(
+                                        columns={insole_right: insole + "_f_lateral_r"},
+                                        inplace=True,
+                                    )
+                                case med if "medial" in med:
+                                    data_csv.rename(
+                                        columns={insole_right: insole + "_f_medial_r"},
+                                        inplace=True,
+                                    )
+                                case heel if "heel" in heel:
+                                    data_csv.rename(
+                                        columns={insole_right: insole + "_f_heel_r"},
+                                        inplace=True,
+                                    )
+                                case tot if (
+                                    insole in tot and "-R" in tot and ":" not in tot
+                                ):
+                                    data_csv.rename(
+                                        columns={insole_right: insole + "_f_total_r"},
+                                        inplace=True,
+                                    )
+                                case xacc if "xAcc" in xacc:
+                                    data_csv.rename(
+                                        columns={insole_right: insole + "_acc_y_r"},
+                                        inplace=True,
+                                    )
+                                    # Inverse axis
+                                    data_csv[insole + "_acc_y_r"] = -data_csv[
+                                        insole + "_acc_y_r"
+                                    ].astype(float)
 
-                            case yacc if "yAcc" in yacc:
-                                data_csv.rename(
-                                    columns={insole_left: insole + "_acc_x_l"},
-                                    inplace=True,
-                                )
-                            case zacc if "zAcc" in zacc:
-                                data_csv.rename(
-                                    columns={insole_left: insole + "_acc_z_l"},
-                                    inplace=True,
-                                )
-                            case xgyro if "xGyro" in xgyro:
-                                data_csv.rename(
-                                    columns={insole_left: insole + "_gyro_y_l"},
-                                    inplace=True,
-                                )
-                                # Inverse axis
-                                data_csv[insole + "_gyro_y_l"] = -data_csv[
-                                    insole + "_gyro_y_l"
-                                ].astype(float)
+                                case yacc if "yAcc" in yacc:
+                                    data_csv.rename(
+                                        columns={insole_right: insole + "_acc_x_r"},
+                                        inplace=True,
+                                    )
+                                case zacc if "zAcc" in zacc:
+                                    data_csv.rename(
+                                        columns={insole_right: insole + "_acc_z_r"},
+                                        inplace=True,
+                                    )
+                                case xgyro if "xGyro" in xgyro:
+                                    data_csv.rename(
+                                        columns={insole_right: insole + "_gyro_y_r"},
+                                        inplace=True,
+                                    )
+                                    # Inverse axis
+                                    data_csv[insole + "_gyro_y_r"] = -data_csv[
+                                        insole + "_gyro_y_r"
+                                    ].astype(float)
 
-                            case ygyro if "yGyro" in ygyro:
-                                data_csv.rename(
-                                    columns={insole_left: insole + "_gyro_x_l"},
-                                    inplace=True,
-                                )
-                            case zgyro if "zGyro" in zgyro:
-                                data_csv.rename(
-                                    columns={insole_left: insole + "_gyro_z_l"},
-                                    inplace=True,
-                                )
+                                case ygyro if "yGyro" in ygyro:
+                                    data_csv.rename(
+                                        columns={insole_right: insole + "_gyro_x_r"},
+                                        inplace=True,
+                                    )
+                                case zgyro if "zGyro" in zgyro:
+                                    data_csv.rename(
+                                        columns={insole_right: insole + "_gyro_z_r"},
+                                        inplace=True,
+                                    )
+                        case code_left if insoles_codes[insole]["code_left"] in code_left:
+                            match code_left:
+                                case lat if "lateral" in lat:
+                                    data_csv.rename(
+                                        columns={code_left: insole + "_f_lateral_l"},
+                                        inplace=True,
+                                    )
+                                case med if "medial" in med:
+                                    data_csv.rename(
+                                        columns={code_left: insole + "_f_medial_l"},
+                                        inplace=True,
+                                    )
+                                case heel if "heel" in heel:
+                                    data_csv.rename(
+                                        columns={code_left: insole + "_f_heel_l"},
+                                        inplace=True,
+                                    )
+                                case tot if (
+                                    insoles_codes[insole]["code_left"] in tot
+                                    and ":" not in tot
+                                ):
+                                    data_csv.rename(
+                                        columns={code_left: insole + "_f_total_l"},
+                                        inplace=True,
+                                    )
+                                case xacc if "xAcc" in xacc:
+                                    data_csv.rename(
+                                        columns={code_left: insole + "_acc_y_l"},
+                                        inplace=True,
+                                    )
+                                    # Inverse axis
+                                    data_csv[insole + "_acc_y_l"] = -data_csv[
+                                        insole + "_acc_y_l"
+                                    ].astype(float)
 
-        # Rename columns names (time)
-        for insole in self.insoles:
-            for key in data_csv.keys():
-                index = data_csv.columns.get_loc(key)
-                match key:
-                    case right if (
-                        "Unnamed" in right
-                        and insole in data_csv.keys()[index + 1]
-                        and "_r" in data_csv.keys()[index + 1]
-                    ):
-                        data_csv.rename(columns={key: insole + "_time_r"}, inplace=True)
-                    case left if (
-                        "Unnamed" in left
-                        and insole in data_csv.keys()[index + 1]
-                        and "_l" in data_csv.keys()[index + 1]
-                    ):
-                        data_csv.rename(columns={key: insole + "_time_l"}, inplace=True)
+                                case yacc if "yAcc" in yacc:
+                                    data_csv.rename(
+                                        columns={code_left: insole + "_acc_x_l"},
+                                        inplace=True,
+                                    )
+                                case zacc if "zAcc" in zacc:
+                                    data_csv.rename(
+                                        columns={code_left: insole + "_acc_z_l"},
+                                        inplace=True,
+                                    )
+                                case xgyro if "xGyro" in xgyro:
+                                    data_csv.rename(
+                                        columns={code_left: insole + "_gyro_y_l"},
+                                        inplace=True,
+                                    )
+                                    # Inverse axis
+                                    data_csv[insole + "_gyro_y_l"] = -data_csv[
+                                        insole + "_gyro_y_l"
+                                    ].astype(float)
+
+                                case ygyro if "yGyro" in ygyro:
+                                    data_csv.rename(
+                                        columns={code_left: insole + "_gyro_x_l"},
+                                        inplace=True,
+                                    )
+                                case zgyro if "zGyro" in zgyro:
+                                    data_csv.rename(
+                                        columns={code_left: insole + "_gyro_z_l"},
+                                        inplace=True,
+                                    )
+                        case insole_left if insole in insole_left and "-L" in insole_left:
+                            match insole_left:
+                                case lat if "lateral" in lat:
+                                    data_csv.rename(
+                                        columns={insole_left: insole + "_f_lateral_l"},
+                                        inplace=True,
+                                    )
+                                case med if "medial" in med:
+                                    data_csv.rename(
+                                        columns={insole_left: insole + "_f_medial_l"},
+                                        inplace=True,
+                                    )
+                                case heel if "heel" in heel:
+                                    data_csv.rename(
+                                        columns={insole_left: insole + "_f_heel_l"},
+                                        inplace=True,
+                                    )
+                                case tot if (
+                                    insole in tot and "-L" in tot and ":" not in tot
+                                ):
+                                    data_csv.rename(
+                                        columns={insole_left: insole + "_f_total_l"},
+                                        inplace=True,
+                                    )
+                                case xacc if "xAcc" in xacc:
+                                    data_csv.rename(
+                                        columns={insole_left: insole + "_acc_y_l"},
+                                        inplace=True,
+                                    )
+                                    # Inverse axis
+                                    data_csv[insole + "_acc_y_l"] = -data_csv[
+                                        insole + "_acc_y_l"
+                                    ].astype(float)
+
+                                case yacc if "yAcc" in yacc:
+                                    data_csv.rename(
+                                        columns={insole_left: insole + "_acc_x_l"},
+                                        inplace=True,
+                                    )
+                                case zacc if "zAcc" in zacc:
+                                    data_csv.rename(
+                                        columns={insole_left: insole + "_acc_z_l"},
+                                        inplace=True,
+                                    )
+                                case xgyro if "xGyro" in xgyro:
+                                    data_csv.rename(
+                                        columns={insole_left: insole + "_gyro_y_l"},
+                                        inplace=True,
+                                    )
+                                    # Inverse axis
+                                    data_csv[insole + "_gyro_y_l"] = -data_csv[
+                                        insole + "_gyro_y_l"
+                                    ].astype(float)
+
+                                case ygyro if "yGyro" in ygyro:
+                                    data_csv.rename(
+                                        columns={insole_left: insole + "_gyro_x_l"},
+                                        inplace=True,
+                                    )
+                                case zgyro if "zGyro" in zgyro:
+                                    data_csv.rename(
+                                        columns={insole_left: insole + "_gyro_z_l"},
+                                        inplace=True,
+                                    )
+
+            # Rename columns names (time)
+            for insole in self.insoles:
+                for key in data_csv.keys():
+                    index = data_csv.columns.get_loc(key)
+                    match key:
+                        case right if (
+                            "Unnamed" in right
+                            and insole in data_csv.keys()[index + 1]
+                            and "_r" in data_csv.keys()[index + 1]
+                        ):
+                            data_csv.rename(columns={key: insole + "_time_r"}, inplace=True)
+                        case left if (
+                            "Unnamed" in left
+                            and insole in data_csv.keys()[index + 1]
+                            and "_l" in data_csv.keys()[index + 1]
+                        ):
+                            data_csv.rename(columns={key: insole + "_time_l"}, inplace=True)
+
+        elif state == "curated":
+            data_csv = pd.read_csv(
+                self.path_csv, sep=",", header=0, na_values="-", dtype=str
+            )
+
+            # Columns to suppress are those that do not have a following column or whose following column does not contain a keyword
+            col_to_suppress = []
+            for idx, col in enumerate(data_csv.columns):
+                if "Unnamed" in col:
+                        col_to_suppress.append(idx)
+
+            data_csv.drop(data_csv.columns[col_to_suppress], axis=1, inplace=True)
 
         # Convert values into floats
         data_csv = data_csv.astype(float)
