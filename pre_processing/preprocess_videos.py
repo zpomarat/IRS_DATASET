@@ -14,8 +14,8 @@ if device == "cuda":
 
 # Paths
 cdir = os.getcwd()
-path_video  = os.path.abspath(os.path.join(cdir, "../", "DATA"))
-path_trials = os.path.abspath(os.path.join(cdir, "../", "DATA", "metadata"))
+path_video  = os.path.abspath(os.path.join(cdir, "../", "data"))
+path_trials = os.path.abspath(os.path.join(cdir, "../", "data", "metadata"))
 
 # Load model
 processor = VideoProcessor(os.path.abspath(os.path.join(cdir,"pre_processing","yolov8n-face-lindevs.pt")), device=device)
