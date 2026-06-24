@@ -131,73 +131,89 @@ class DataForceplates:
         columns = ["time", "fx1", "fy1", "fz1", "fx2", "fy2", "fz2"]
         self.raw_data = pd.DataFrame(data, columns).T
 
-    def read_csv(self):
+    def read_csv(self,state="raw"):
         """Reads a csv file and extracts the raw data and time for the forceplates 2 and 5 (Petite Plateforme)."""
 
         if os.path.isfile(self.path_csv) == False:
             raise ValueError("The csv file does not exist.")
 
-        # Read the csv file as a Dataframe
-        data_csv = pd.read_csv(
-            self.path_csv, sep=",", header=2, na_values="-", dtype=str
-        )
+        if state == "raw":    
 
-        # Correspondance columns names and fp numbers
-        forceplates_names = {"1": "Plateforme Sensix 1 - Force",
-                             "2": "Plateforme Sensix 2 - Force",
-                             "3": "Plateforme Sensix 3 - Force",
-                             "4": "Grande Plateforme AMTI - Force",
-                             "5": "Petite Plateforme AMTI - Force"}
-
-        # Indexes of columns to keep
-        columns_to_keep = []
-
-        for number in self.fp_number:
-            columns_to_keep.append(
-                data_csv.columns.get_loc(forceplates_names[str(number)])
-            )
-            columns_to_keep.append(
-                data_csv.columns.get_loc(forceplates_names[str(number)]) + 1
-            )
-            columns_to_keep.append(
-                data_csv.columns.get_loc(forceplates_names[str(number)]) + 2
+            # Read the csv file as a Dataframe
+            data_csv = pd.read_csv(
+                self.path_csv, sep=",", header=2, na_values="-", dtype=str
             )
 
-        # Suppress all others columns
-        data_csv.drop(
-            columns=[
-                data_csv.columns[idx]
-                for idx in range(len(data_csv.columns))
-                if idx not in columns_to_keep
-            ],
-            inplace=True,
-        )
+            # Correspondance columns names and fp numbers
+            forceplates_names = {"1": "Plateforme Sensix 1 - Force",
+                                "2": "Plateforme Sensix 2 - Force",
+                                "3": "Plateforme Sensix 3 - Force",
+                                "4": "Grande Plateforme AMTI - Force",
+                                "5": "Petite Plateforme AMTI - Force"}
 
-        # Rename columns names
-        rename_dict = {}
-        for number in self.fp_number:
-            col_idx = data_csv.columns.get_loc(forceplates_names[str(number)])
-            rename_dict[data_csv.columns[col_idx]]     = f"fx{number}"
-            rename_dict[data_csv.columns[col_idx + 1]] = f"fy{number}"
-            rename_dict[data_csv.columns[col_idx + 2]] = f"fz{number}"
+            # Indexes of columns to keep
+            columns_to_keep = []
 
-        data_csv.rename(columns=rename_dict, inplace=True)
+            for number in self.fp_number:
+                columns_to_keep.append(
+                    data_csv.columns.get_loc(forceplates_names[str(number)])
+                )
+                columns_to_keep.append(
+                    data_csv.columns.get_loc(forceplates_names[str(number)]) + 1
+                )
+                columns_to_keep.append(
+                    data_csv.columns.get_loc(forceplates_names[str(number)]) + 2
+                )
 
-        # Suppres the lines with  force denomination and units
-        data_csv.drop([0, 1], axis=0, inplace=True)
+            # Suppress all others columns
+            data_csv.drop(
+                columns=[
+                    data_csv.columns[idx]
+                    for idx in range(len(data_csv.columns))
+                    if idx not in columns_to_keep
+                ],
+                inplace=True,
+            )
 
-        # Reset index
-        data_csv.reset_index(drop=True, inplace=True)
+            # Rename columns names
+            rename_dict = {}
+            for number in self.fp_number:
+                col_idx = data_csv.columns.get_loc(forceplates_names[str(number)])
+                rename_dict[data_csv.columns[col_idx]]     = f"fx{number}"
+                rename_dict[data_csv.columns[col_idx + 1]] = f"fy{number}"
+                rename_dict[data_csv.columns[col_idx + 2]] = f"fz{number}"
+
+            data_csv.rename(columns=rename_dict, inplace=True)
+
+            # Suppres the lines with  force denomination and units
+            data_csv.drop([0, 1], axis=0, inplace=True)
+
+            # Reset index
+            data_csv.reset_index(drop=True, inplace=True)
+
+            # Add time
+            time = np.arange(0, len(data_csv) / self.frequency, 1 / self.frequency)
+            if len(time) > len(data_csv):
+                time = time[0 : len(data_csv)]
+
+            data_csv.insert(loc=0, column="time", value=time)
+        
+        elif state == "curated":
+            # Read the csv file as a Dataframe
+            data_csv = pd.read_csv(
+                self.path_csv, sep=",", header=0, na_values="-", dtype=str
+            )
+
+            # Columns to suppress are those that do not have a following column or whose following column does not contain a keyword
+            col_to_suppress = []
+            for idx, col in enumerate(data_csv.columns):
+                if "Unnamed" in col:
+                        col_to_suppress.append(idx)
+
+            data_csv.drop(data_csv.columns[col_to_suppress], axis=1, inplace=True)
 
         # Convert valued into floats
         data_csv = data_csv.astype(float)
-
-        # Add time
-        time = np.arange(0, len(data_csv) / self.frequency, 1 / self.frequency)
-        if len(time) > len(data_csv):
-            time = time[0 : len(data_csv)]
-
-        data_csv.insert(loc=0, column="time", value=time)
 
         self.raw_data = data_csv
 
