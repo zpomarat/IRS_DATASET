@@ -49,7 +49,7 @@ class VideoProcessor:
         return cv2.resize(small, (w, h), interpolation=cv2.INTER_NEAREST)
 
     def blur_faces(self, input_path: str, output_path: str,
-                   detect_every: int = 10, padding: int = 30,
+                   detect_every: int = 1, padding: int = 30,
                    pixelate_blocks: int = 10):
         """
         Detect and anonymize faces in a video using YOLOv8 + pixelation.
