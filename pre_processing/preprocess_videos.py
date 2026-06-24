@@ -18,7 +18,7 @@ path_video  = os.path.abspath(os.path.join(cdir, "../", "DATA"))
 path_trials = os.path.abspath(os.path.join(cdir, "../", "DATA", "metadata"))
 
 # Load model
-processor = VideoProcessor("yolov8n-face-lindevs.pt", device=device)
+processor = VideoProcessor(os.path.abspath(os.path.join(cdir,"pre_processing","yolov8n-face-lindevs.pt")), device=device)
 
 # Load trial list
 trials = pd.read_csv(
