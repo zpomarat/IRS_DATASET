@@ -28,7 +28,7 @@ names = pd.read_csv(
 )
 
 # Load insoles codes
-with open(os.path.abspath(os.path.join(cdir,"data_curation","utils","insoles_correspondance.yaml")),"r") as f:
+with open(os.path.abspath(os.path.join(cdir,"shared","insoles_correspondance.yaml")),"r") as f:
     insoles_correspondance = yaml.safe_load(f)
 
 # Choose session
