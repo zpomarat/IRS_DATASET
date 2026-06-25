@@ -1,5 +1,5 @@
 # This script was used to manually identify synchronization indices
-# by visually inspecting force signals and detecting the tap event peak.
+# by visually inspecting force signals and detecting the tap/jump event peak.
 # Identified indices are stored in metadata/trials.csv (idx_sync_* columns).
 
 
@@ -81,114 +81,96 @@ for _, trial in trials.iterrows():
         # Read raw data
         fp_dict[f"{trial.subject_id}_{trial.trial_id}"].read_csv(state="curated")
 
+# Plot raw loadsol and forceplates data
+def plot_loadsol_data(loadsol_data: pd.DataFrame, trial_name: str):
+    """
+    Plot Loadsol insole data (forces, accelerations, angular velocities)
+    for left and right foot.
+
+    Args:
+        loadsol_data: DataFrame containing Loadsol data.
+        trial_name: Trial name for the figure title (optional).
+    """
+    # Data to plot per row: (columns_suffix, labels, ylabel)
+    rows = [
+        (
+            ["f_heel", "f_medial", "f_lateral", "f_total"],
+            ["Heel", "Medial", "Lateral", "Total"],
+            "Force (N)"
+        ),
+        (
+            ["acc_x", "acc_y", "acc_z"],
+            ["Acc x", "Acc y", "Acc z"],
+            "Acceleration (g)"
+        ),
+        (
+            ["gyro_x", "gyro_y", "gyro_z"],
+            ["Gyro x", "Gyro y", "Gyro z"],
+            "Angular velocity (rad/s)"
+        ),
+    ]
+
+    fig, axs = plt.subplots(3, 2, figsize=(12, 10))
+    fig.suptitle(f"Loadsol data — {trial_name}")
+
+    for row_idx, (columns, labels, ylabel) in enumerate(rows):
+        for col_idx, side in enumerate(["l", "r"]):
+            ax = axs[row_idx, col_idx]
+            for col, label in zip(columns, labels):
+                ax.plot(loadsol_data[f"{col}_{side}"], label=label)
+            ax.set_xlabel("Frame")
+            ax.set_ylabel(ylabel)
+            ax.legend()
+            if row_idx == 0:
+                ax.set_title("Left foot" if side == "l" else "Right foot")
+
+    fig.tight_layout()
 
 
-# # for trial in list_of_trials:
-#     # Create DataLoadsol and DataForceplates objects
-#     if trial not in ls_fp_to_exclude:
-#         ls_dict[trial] = DataLoadsol(
-#             dir_path=path_insoles, file_name=trial, frequency=200
-#         )
-#         fp_dict[trial] = DataForceplates(
-#             dir_path=path_forceplates, file_name=trial, file_type="csv", frequency=1000
-#         )
+def plot_fp_data(fp_data: pd.DataFrame, trial_name: str):
+    """
+    Plot force plate data (forces) for left and right foot.
 
-#         # Pre-treat DataLoadsol objects
-#         ls_dict[trial].fill_missing_data()
+    Args:
+        fp_data: DataFrame containing force plate data.
+        trial_name: Trial name for the figure title.
+    """
+    # Data to plot per row: (columns_suffix, labels, ylabel)
+    rows = [
+        (
+            ["fx", "fy", "fz"],
+            ["Fx (L)", "Fy (AP)", "Fz (V)"],
+            "Force (N)"
+        ),
+    ]
 
-#         # Pre-treat DataForceplates objects
-#         fp_dict[trial].pre_process_data()
+    fig, axs = plt.subplots(1, 2, figsize=(12, 4))  # 1 ligne, 2 colonnes
+    fig.suptitle(f"Forceplates data — {trial_name}")
 
+    for _, (columns, labels, ylabel) in enumerate(rows):
+        for col_idx, side in enumerate(["l", "r"]):
+            ax = axs[col_idx]
+            for col, label in zip(columns, labels):
+                ax.plot(fp_data[f"{col}_{side}"], label=label)
+            ax.set_xlabel("Frame")
+            ax.set_ylabel(ylabel)
+            ax.legend()
+            ax.set_title("Left foot" if side == "l" else "Right foot")
 
-# for trial in ls_dict.keys():
-#     fig1, axs = plt.subplots(3, 2)
+    fig.tight_layout()
 
-#     # Plot insoles data
-#     fig1.suptitle(f"Pre-treated insoles data ({trial})")
-#     axs[0, 0].plot(ls_dict[trial].filled_data["f_heel_l"], label="f heel")
-#     axs[0, 0].plot(ls_dict[trial].filled_data["f_medial_l"], label="f medial")
-#     axs[0, 0].plot(ls_dict[trial].filled_data["f_lateral_l"], label="f lateral")
-#     axs[0, 0].plot(ls_dict[trial].filled_data["f_total_l"], label="f total")
-#     axs[0, 0].set_xlabel("Frame")
-#     axs[0, 0].set_ylabel("Force (N)")
-#     axs[0, 0].legend()
-#     axs[0, 0].set_title("Left")
+# Exclude ls_S08_T04: almost half a=of the trial is missing for left insole
+trial_to_exclude= "S08_T04"
 
-#     axs[1, 0].plot(ls_dict[trial].filled_data["acc_x_l"], label="acc x")
-#     axs[1, 0].plot(ls_dict[trial].filled_data["acc_y_l"], label="acc y")
-#     axs[1, 0].plot(ls_dict[trial].filled_data["acc_z_l"], label="acc z")
-#     axs[1, 0].set_xlabel("Frame")
-#     axs[1, 0].set_ylabel("Acceleration (g)")
-#     axs[1, 0].legend()
+for _, trial in trials.iterrows():
+    trial_name = f"{trial.subject_id}_{trial.trial_id}"
 
-#     axs[2, 0].plot(ls_dict[trial].filled_data["gyro_x_l"], label="gyro x")
-#     axs[2, 0].plot(ls_dict[trial].filled_data["gyro_y_l"], label="gyro y")
-#     axs[2, 0].plot(ls_dict[trial].filled_data["gyro_z_l"], label="gyro z")
-#     axs[2, 0].set_xlabel("Frame")
-#     axs[2, 0].set_ylabel("Angular velocity (rad/s)")
-#     axs[2, 0].legend()
+    # Plot forceplates si disponible
+    if trial_name in fp_dict:
+        plot_fp_data(fp_data=fp_dict[trial_name].raw_data, trial_name=trial_name)
 
-#     axs[0, 1].plot(ls_dict[trial].filled_data["f_heel_r"], label="f heel")
-#     axs[0, 1].plot(ls_dict[trial].filled_data["f_medial_r"], label="f medial")
-#     axs[0, 1].plot(ls_dict[trial].filled_data["f_lateral_r"], label="f lateral")
-#     axs[0, 1].plot(ls_dict[trial].filled_data["f_total_r"], "-o", label="f total")
-#     axs[0, 1].set_xlabel("Frame")
-#     axs[0, 1].set_ylabel("Force (N)")
-#     axs[0, 1].legend()
-#     axs[0, 1].set_title("Right")
+    # Plot loadsol si disponible
+    if trial_name in ls_dict and trial_name != trial_to_exclude:
+        plot_loadsol_data(loadsol_data=ls_dict[trial_name].raw_data, trial_name=trial_name)
 
-#     axs[1, 1].plot(ls_dict[trial].filled_data["acc_x_r"], "-o", label="acc x")
-#     axs[1, 1].plot(ls_dict[trial].filled_data["acc_y_r"], "-o", label="acc y")
-#     axs[1, 1].plot(ls_dict[trial].filled_data["acc_z_r"], "-o", label="acc z")
-#     axs[1, 1].set_xlabel("Frame")
-#     axs[1, 1].set_ylabel("Acceleration (g)")
-#     axs[1, 1].legend()
-
-#     axs[2, 1].plot(ls_dict[trial].filled_data["gyro_x_r"], "-o", label="gyro x")
-#     axs[2, 1].plot(ls_dict[trial].filled_data["gyro_y_r"], "-o", label="gyro y")
-#     axs[2, 1].plot(ls_dict[trial].filled_data["gyro_z_r"], "-o", label="gyro z")
-#     axs[2, 1].set_xlabel("Frame")
-#     axs[2, 1].set_ylabel("Angular velocity (rad/s)")
-#     axs[2, 1].legend()
-
-#     fig1.tight_layout()
-
-#     # Plot insoles data
-#     fig2, axs = plt.subplots(3, 2)
-#     fig2.suptitle(f"Pre-treated forceplates data ({trial})")
-#     axs[0, 0].plot(fp_dict[trial].pre_processed_data["fx1"], label="fx")
-#     axs[0, 0].set_xlabel("Frame")
-#     axs[0, 0].set_ylabel("Force (N)")
-#     axs[0, 0].set_title("Left")
-#     axs[0, 0].legend()
-
-#     axs[1, 0].plot(fp_dict[trial].pre_processed_data["fy1"], label="fy")
-#     axs[1, 0].set_xlabel("Frame")
-#     axs[1, 0].set_ylabel("Force (N)")
-#     axs[1, 0].legend()
-
-#     axs[2, 0].plot(fp_dict[trial].pre_processed_data["fz1"], label="fz")
-#     axs[2, 0].set_xlabel("Frame")
-#     axs[2, 0].set_ylabel("Force (N)")
-#     axs[2, 0].legend()
-
-#     axs[0, 1].plot(fp_dict[trial].pre_processed_data["fx2"], "-o", label="fx")
-#     axs[0, 1].set_xlabel("Frame")
-#     axs[0, 1].set_ylabel("Force (N)")
-#     axs[0, 1].set_title("Right")
-#     axs[0, 1].legend()
-
-#     axs[1, 1].plot(fp_dict[trial].pre_processed_data["fy2"], label="fy")
-#     axs[1, 1].set_xlabel("Frame")
-#     axs[1, 1].set_ylabel("Force (N)")
-#     axs[1, 1].legend()
-
-#     axs[2, 1].plot(fp_dict[trial].pre_processed_data["fz2"], "-o", label="fz")
-#     axs[2, 1].set_xlabel("Frame")
-#     axs[2, 1].set_ylabel("Force (N)")
-#     axs[2, 1].legend()
-#     fig2.tight_layout()
-#     plt.show()
-
-
-# print("ok")
+    plt.show()
