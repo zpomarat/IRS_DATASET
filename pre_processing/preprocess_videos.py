@@ -40,6 +40,8 @@ for _, trial in trials.iterrows():
 
         input_path  = os.path.abspath(os.path.join(
             path_video, f"{trial.subject_id}_{trial.trial_id}_{side}.MOV"))
+        temp_path   = os.path.abspath(os.path.join(
+            path_video, f"{trial.subject_id}_{trial.trial_id}_{side}_temp.mp4"))
         output_path = os.path.abspath(os.path.join(
             path_video, f"{trial.subject_id}_{trial.trial_id}_{side}.mp4"))
 
@@ -47,8 +49,12 @@ for _, trial in trials.iterrows():
             print(f"WARNING: file not found: {input_path}")
             continue
 
+        # Convert MOV to MP4 first
+        print(f"Converting: {trial.subject_id}_{trial.trial_id}_{side}")
+        processor.convert_to_mp4(input_path, temp_path)
+
         # Read video metadata before processing
-        cap = cv2.VideoCapture(input_path)
+        cap = cv2.VideoCapture(temp_path)
         n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         fps      = cap.get(cv2.CAP_PROP_FPS)
         width    = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))

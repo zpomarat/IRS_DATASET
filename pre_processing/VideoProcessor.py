@@ -2,7 +2,8 @@ from ultralytics import YOLO
 import cv2
 import torch
 import numpy as np
-
+import subprocess
+import os
 
 class VideoProcessor:
     """
@@ -29,6 +30,23 @@ class VideoProcessor:
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
         print(f"VideoProcessor initialized on {self.device}")
+
+    def convert_to_mp4(self, input_path: str, output_path: str):
+        """
+        Convert video to MP4 H.264 using FFmpeg.
+        Necessary for OpenCV to read MOV files correctly on all platforms.
+
+        Args:
+            input_path: Path to the input video file (e.g. .MOV).
+            output_path: Path to save the converted MP4 file.
+        """
+        subprocess.run([
+            "ffmpeg", "-i", input_path,
+            "-c:v", "libx264",
+            "-an",       # remove audio
+            "-y",        # overwrite if exists
+            output_path
+        ], check=True)
 
     def _pixelate(self, face_roi: np.ndarray, blocks: int = 10) -> np.ndarray:
         """
@@ -66,6 +84,7 @@ class VideoProcessor:
             padding: Extra pixels added around detected bounding boxes (default: 30).
             pixelate_blocks: Pixelation strength — lower = stronger (default: 10).
         """
+
         cap = cv2.VideoCapture(input_path)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         print(f"Processing {input_path} — {total_frames} frames")
