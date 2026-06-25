@@ -25,6 +25,7 @@ class DataForceplates:
         self.path_csv = os.path.abspath(os.path.join(self.path,self.file_name + ".csv"))
         self.path_c3d = os.path.abspath(os.path.join(self.path,self.file_name + ".c3d"))
         self.frequency = frequency
+        self.final_frequency = None
         self.fp_number = fp_number
         self.raw_data = None
         self.timestamp = None
@@ -265,7 +266,6 @@ class DataForceplates:
             1 / final_frequency,
         )
 
-        # for key in self.pre_processed_data.keys():
         for key in data.keys():
 
             # Create interpolation function
@@ -288,25 +288,34 @@ class DataForceplates:
             fcut (int): Must be smaller than the half of the sampling frequency.
         """
 
-        if fcut > self.final_frequency:
-            raise ValueError(
-                "The cutting frequency should be lower than the frequency."
-            )
+        if self.downsampled_data is None:
+            if fcut > self.frequency:
+                raise ValueError(
+                    "The cutting frequency should be lower than the frequency."
+                )
+        else:
+            if fcut > self.final_frequency:
+                raise ValueError(
+                    "The cutting frequency should be lower than the frequency."
+                )
 
         # Initialise downsampled data
         self.filtered_data = deepcopy(data)
 
-        Wn = fcut / (self.final_frequency / 2)
+        if self.final_frequency is None:
+            Wn = fcut / (self.frequency / 2)
+        else:
+            Wn = fcut / (self.final_frequency / 2)
 
         b, a = signal.butter(order, Wn, analog=False)
 
         # Filter data
-        keys = [key for key in self.pre_processed_data.keys() if "time" not in key]
+        keys = [key for key in data.keys() if "time" not in key]
 
         for key in keys:
             self.filtered_data[key] = signal.filtfilt(b, a, self.filtered_data[key])
 
-    def export_curated_data(self, data: pd.DataFrame, path: str, name: str):
+    def export_pre_treated_data(self, data: pd.DataFrame, path: str, name: str):
         """Exports the DataFrame containing the curated data to a csv file.
 
         Args:
@@ -315,211 +324,3 @@ class DataForceplates:
         """
 
         data.to_csv(os.path.abspath(os.path.join(path, name + ".csv")))
-
-
-# TEST
-if __name__ == "__main__":
-    path = "C:\\Users\\zpomarat\\Documents\\"
-
-    test = DataForceplates(
-        dir_path=path, file_name="S3T2$", frequency=1000, fp_number=[2, 5]
-    )
-
-    # Raw data
-    # test.extract_timestamp()
-    test.read_csv()
-    plt.figure()
-    plt.plot(
-        test.raw_data["time"],
-        test.raw_data["fx" + str(test.fp_number[0])],
-        label="fx" + str(test.fp_number[0]),
-    )
-    plt.plot(
-        test.raw_data["time"],
-        test.raw_data["fy" + str(test.fp_number[0])],
-        label="fy" + str(test.fp_number[0]),
-    )
-    plt.plot(
-        test.raw_data["time"],
-        test.raw_data["fz" + str(test.fp_number[0])],
-        label="fz" + str(test.fp_number[0]),
-    )
-    plt.plot(
-        test.raw_data["time"],
-        test.raw_data["fx" + str(test.fp_number[1])],
-        label="fx" + str(test.fp_number[1]),
-    )
-    plt.plot(
-        test.raw_data["time"],
-        test.raw_data["fy" + str(test.fp_number[1])],
-        label="fy" + str(test.fp_number[1]),
-    )
-    plt.plot(
-        test.raw_data["time"],
-        test.raw_data["fz" + str(test.fp_number[1])],
-        label="fz" + str(test.fp_number[1]),
-    )
-    plt.legend()
-    plt.title("Raw data from csv file")
-    plt.show()
-
-    # # test.read_csv()
-    # #     plt.plot(test.raw_data["time"], test.raw_data["fx1"], label="fx1")
-    # #     plt.plot(test.raw_data["time"], test.raw_data["fy1"], label="fy1")
-    # #     plt.plot(test.raw_data["time"], test.raw_data["fz1"], label="fz1")
-    # #     plt.plot(test.raw_data["time"], test.raw_data["fx2"], label="fx2")
-    # #     plt.plot(test.raw_data["time"], test.raw_data["fy2"], label="fy2")
-    # #     plt.plot(test.raw_data["time"], test.raw_data["fz2"], label="fz2")
-    # #     plt.legend()
-    # #     plt.title("Raw data from csv file")
-
-    # #     print(f"Raw data csv TIME[0]: {test.raw_data["time"].iloc[0]}")
-    # #     print(f"Raw data csv TIME[1000]: {test.raw_data["time"].iloc[1000]}")
-    # #     print(f"Raw data csv TIME[-1]: {test.raw_data["time"].iloc[-1]}")
-
-    # #     print(f"Raw data csv FX1[0]: {test.raw_data["fx1"].iloc[0]}")
-    # #     print(f"Raw data csv FX1[1000]: {test.raw_data["fx1"].iloc[1000]}")
-    # #     print(f"Raw data csv FX1[-1]: {test.raw_data["fx1"].iloc[-1]}")
-
-    # #     print(f"Raw data csv FZ2[0]: {test.raw_data["fz2"].iloc[0]}")
-    # #     print(f"Raw data csv FZ2[1000]: {test.raw_data["fz2"].iloc[1000]}")
-    # #     print(f"Raw data csv FZ2[-1]: {test.raw_data["fz2"].iloc[-1]}")
-
-    # #     # Pre-processed data: orientation changed and zero set
-    # #     # test.pre_process_data()
-    # test.pre_process_data()
-
-    # plt.figure()
-    # plt.plot(
-    #     test.pre_processed_data["time"], test.pre_processed_data["fx2"], label="fx2"
-    # )
-    # plt.plot(
-    #     test.pre_processed_data["time"], test.pre_processed_data["fy2"], label="fy2"
-    # )
-    # plt.plot(
-    #     test.pre_processed_data["time"], test.pre_processed_data["fz2"], label="fz2"
-    # )
-    # plt.plot(
-    #     test.pre_processed_data["time"], test.pre_processed_data["fx5"], label="fx5"
-    # )
-    # plt.plot(
-    #     test.pre_processed_data["time"], test.pre_processed_data["fy5"], label="fy5"
-    # )
-    # plt.plot(
-    #     test.pre_processed_data["time"], test.pre_processed_data["fz5"], label="fz5"
-    # )
-    # plt.legend()
-    # plt.title("Pre-processed data")
-
-    # #     print(f"Pre processed data TIME[0]: {test.pre_processed_data["time"].iloc[0]}")
-    # #     print(f"Pre processed data TIME[1000]: {test.pre_processed_data["time"].iloc[1000]}")
-    # #     print(f"Pre processed data TIME[-1]: {test.pre_processed_data["time"].iloc[-1]}")
-
-    # #     print(f"Pre processed data FX1[0]: {test.pre_processed_data["fx1"].iloc[0]}")
-    # #     print(f"Pre processed data FX1[1000]: {test.pre_processed_data["fx1"].iloc[1000]}")
-    # #     print(f"Pre processed data FX1[-1]: {test.pre_processed_data["fx1"].iloc[-1]}")
-
-    # #     print(f"Pre processed data FZ2[0]: {test.pre_processed_data["fz2"].iloc[0]}")
-    # #     print(f"Pre processed data FZ2[1000]: {test.pre_processed_data["fz2"].iloc[1000]}")
-    # #     print(f"Pre processed data FZ2[-1]: {test.pre_processed_data["fz2"].iloc[-1]}")
-
-    # #     # Downsample data
-    # #     # test.downsample(final_frequency=200)
-    # test.downsample(data=test.pre_processed_data,final_frequency=200)
-
-    # plt.figure()
-    # plt.plot(
-    #     test.pre_processed_data["time"],
-    #     test.pre_processed_data["fx2"],
-    #     label="pre_processed",
-    # )
-    # plt.plot(
-    #     test.downsampled_data["time"],
-    #     test.downsampled_data["fx2"],
-    #     "-o",
-    #     label="downsampled",
-    # )
-    # plt.legend()
-    # plt.title("Dowsampled fx2")
-
-    # #     print(f"Downsampled data TIME[0]: {test.downsampled_data["time"].iloc[0]}")
-    # #     print(f"Downsampled data TIME[1000]: {test.downsampled_data["time"].iloc[1000]}")
-    # #     print(f"Downsampled data TIME[-1]: {test.downsampled_data["time"].iloc[-1]}")
-
-    # #     print(f"Downsampled data FX1[0]: {test.downsampled_data["fx1"].iloc[0]}")
-    # #     print(f"Downsampled data FX1[1000]: {test.downsampled_data["fx1"].iloc[1000]}")
-    # #     print(f"Downsampled data FX1[-1]: {test.downsampled_data["fx1"].iloc[-1]}")
-
-    # #     print(f"Downsampled data FZ2[0]: {test.downsampled_data["fz2"].iloc[0]}")
-    # #     print(f"Downsampled data FZ2[1000]: {test.downsampled_data["fz2"].iloc[1000]}")
-    # #     print(f"Downsampled data FZ2[-1]: {test.downsampled_data["fz2"].iloc[-1]}")
-
-    # #     # Filtered data
-    # #     # test.filter(fs=200, order=4, fcut=20)
-    # test.filter(data=test.downsampled_data, order=4, fcut=20)
-
-    # plt.figure()
-    # plt.plot(
-    #     test.downsampled_data["time"],
-    #     test.downsampled_data["fx2"],
-    #     label="downsampled fx2",
-    # )
-    # plt.plot(
-    #     test.filtered_data["time"], test.filtered_data["fx2"], label="filtered fx2"
-    # )
-    # plt.plot(
-    #     test.downsampled_data["time"],
-    #     test.downsampled_data["fy2"],
-    #     label="downsampled fy2",
-    # )
-    # plt.plot(
-    #     test.filtered_data["time"], test.filtered_data["fy2"], label="filtered fy2"
-    # )
-    # plt.plot(
-    #     test.downsampled_data["time"],
-    #     test.downsampled_data["fz2"],
-    #     label="downsampled fz2",
-    # )
-    # plt.plot(
-    #     test.filtered_data["time"], test.filtered_data["fz2"], label="filtered fz2"
-    # )
-    # plt.plot(
-    #     test.downsampled_data["time"],
-    #     test.downsampled_data["fx5"],
-    #     label="downsampled fx5",
-    # )
-    # plt.plot(
-    #     test.filtered_data["time"], test.filtered_data["fx5"], label="filtered fx5"
-    # )
-    # plt.plot(
-    #     test.downsampled_data["time"],
-    #     test.downsampled_data["fy5"],
-    #     label="downsampled fy5",
-    # )
-    # plt.plot(
-    #     test.filtered_data["time"], test.filtered_data["fy5"], label="filtered fy5"
-    # )
-    # plt.plot(
-    #     test.downsampled_data["time"],
-    #     test.downsampled_data["fz5"],
-    #     label="downsampled fz5",
-    # )
-    # plt.plot(
-    #     test.filtered_data["time"], test.filtered_data["fz5"], label="filtered fz5"
-    # )
-    # plt.legend()
-    # plt.title("Filtered data")
-
-    # #     print(f"Filtered data TIME[0]: {test.filtered_data["time"].iloc[0]}")
-    # #     print(f"Filtered data TIME[1000]: {test.filtered_data["time"].iloc[1000]}")
-    # #     print(f"Filtered data TIME[-1]: {test.filtered_data["time"].iloc[-1]}")
-
-    # #     print(f"Filtered data FX1[0]: {test.filtered_data["fx1"].iloc[0]}")
-    # #     print(f"Filtered data FX1[1000]: {test.filtered_data["fx1"].iloc[1000]}")
-    # #     print(f"Filtered data FX1[-1]: {test.filtered_data["fx1"].iloc[-1]}")
-
-    # #     print(f"Filtered data FZ2[0]: {test.filtered_data["fz2"].iloc[0]}")
-    # #     print(f"Filtered data FZ2[1000]: {test.filtered_data["fz2"].iloc[1000]}")
-    # #     print(f"Filtered data FZ2[-1]: {test.filtered_data["fz2"].iloc[-1]}")
-
-    # plt.show()
