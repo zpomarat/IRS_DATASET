@@ -8,12 +8,17 @@ sys.path.append(os.path.abspath(os.path.join(cdir)))
 from shared.DataLoadsol import DataLoadsol
 import pandas as pd
 import yaml
+import csv
+
+# Choose session
+SESSION = "session_1"
 
 # Paths
 path_loadsol = {"session_1": "D://DATA//MANIPS_SESSION_1//insoles//",
                 "session_2": "D://DATA//MANIPS_SESSION_2//insoles//"}
 path_trials = os.path.abspath(os.path.join(cdir, "../", "data", "metadata"))
 path_output = os.path.abspath(os.path.join(cdir,"..","data","raw","loadsol"))
+log_path = os.path.abspath(os.path.join(path_trials, f"loadsol_frames_log_{SESSION}.csv"))
 
 # Load trial list
 trials = pd.read_csv(
@@ -31,11 +36,12 @@ names = pd.read_csv(
 with open(os.path.abspath(os.path.join(cdir,"shared","insoles_correspondance.yaml")),"r") as f:
     insoles_correspondance = yaml.safe_load(f)
 
-# Choose session
-SESSION = "session_2"
-
 # Filter trials for current session only
 trials_session = trials[trials["session"] == SESSION[-1]]
+
+with open(log_path, "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(["subject_id", "trial_id", "n_frames_loadsol"])
 
 # Main loop
 for _, trial in trials_session.iterrows():
@@ -63,6 +69,14 @@ for _, trial in trials_session.iterrows():
 
         # Export csv rearranged
         loadsol.export_pre_treated_data(data=loadsol.raw_data,path=path_output,name=f"{trial.subject_id}_{trial.trial_id}_ls")
+
+        # Export the number of frames for each trial
+        n_frames_ls = len(loadsol.raw_data)
+        with open(log_path, "a", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([trial.subject_id, trial.trial_id, n_frames_ls])
+
+
 
 
 

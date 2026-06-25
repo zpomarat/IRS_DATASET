@@ -7,14 +7,19 @@ sys.path.append(os.path.abspath(os.path.join(cdir)))
 
 from shared.DataForceplates import DataForceplates
 import pandas as pd
+import csv
+
+# Choose session
+SESSION = "session_1"
 
 # Paths
 path_forceplates = {
-    "session_1": "D://DATA//MANIPS_CREPS_JUILLET_2024//forceplates//",
-    "session_2": "D://DATA//MANIPS_CREPS_JANVIER_2025//forceplates//",
+    "session_1": "D://DATA//MANIPS_SESSION_1//forceplates//",
+    "session_2": "D://DATA//MANIPS_SESSION_2//forceplates//",
 }
 path_trials = os.path.abspath(os.path.join(cdir, "../", "data", "metadata"))
 path_output = os.path.abspath(os.path.join(cdir, "..", "data", "raw", "forceplates"))
+log_path = os.path.abspath(os.path.join(path_trials, f"fp_frames_log_{SESSION}.csv"))
 
 # Load trial list
 trials = pd.read_csv(
@@ -36,14 +41,15 @@ names = pd.read_csv(
     dtype=str,
 )
 
-# Choose session
-SESSION = "session_2"
-
 # Forceplates numbers used during each session [left,right]
 fp_number = {"session_1": [1, 2], "session_2": [2, 5]}
 
 # Filter trials for current session only
 trials_session = trials[trials["session"] == SESSION[-1]]
+
+with open(log_path, "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(["subject_id", "trial_id", "n_frames_fp"])
 
 # Main loop
 for _, trial in trials_session.iterrows():
@@ -118,6 +124,12 @@ for _, trial in trials_session.iterrows():
         # Export csv rearranged
         match SESSION:
             case "session_1":
-                forceplates.export_curated_data(data=unified_forceplates,path=path_output,name=f"{trial.subject_id}_{trial.trial_id}_fp")
+                forceplates.export_pre_treated_data(data=unified_forceplates,path=path_output,name=f"{trial.subject_id}_{trial.trial_id}_fp")
             case "session_2":
-                forceplates.export_curated_data(data=forceplates.pre_processed_data,path=path_output,name=f"{trial.subject_id}_{trial.trial_id}_fp")
+                forceplates.export_pre_treated_data(data=forceplates.pre_processed_data,path=path_output,name=f"{trial.subject_id}_{trial.trial_id}_fp")
+
+        # Export the number of frames for each trial
+        n_frames_fp = len(forceplates.raw_data)
+        with open(log_path, "a", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([trial.subject_id, trial.trial_id, n_frames_fp])
