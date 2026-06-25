@@ -252,17 +252,17 @@ class DataLoadsol:
                             match code_right:
                                 case lat if "lateral" in lat:
                                     data_csv.rename(
-                                        columns={code_right: insole + "_f_lateral_r"},
+                                        columns={code_right: "f_lateral_r"},
                                         inplace=True,
                                     )
                                 case med if "medial" in med:
                                     data_csv.rename(
-                                        columns={code_right: insole + "_f_medial_r"},
+                                        columns={code_right: "f_medial_r"},
                                         inplace=True,
                                     )
                                 case heel if "heel" in heel:
                                     data_csv.rename(
-                                        columns={code_right: insole + "_f_heel_r"},
+                                        columns={code_right: "f_heel_r"},
                                         inplace=True,
                                     )
                                 case tot if (
@@ -270,47 +270,39 @@ class DataLoadsol:
                                     and ":" not in tot
                                 ):
                                     data_csv.rename(
-                                        columns={code_right: insole + "_f_total_r"},
+                                        columns={code_right: "f_total_r"},
                                         inplace=True,
                                     )
                                 case xacc if "xAcc" in xacc:
                                     data_csv.rename(
-                                        columns={code_right: insole + "_acc_y_r"},
+                                        columns={code_right: "acc_x_r"},
                                         inplace=True,
                                     )
-                                    # Inverse axis
-                                    data_csv[insole + "_acc_y_r"] = -data_csv[
-                                        insole + "_acc_y_r"
-                                    ].astype(float)
 
                                 case yacc if "yAcc" in yacc:
                                     data_csv.rename(
-                                        columns={code_right: insole + "_acc_x_r"},
+                                        columns={code_right: "acc_y_r"},
                                         inplace=True,
                                     )
                                 case zacc if "zAcc" in zacc:
                                     data_csv.rename(
-                                        columns={code_right: insole + "_acc_z_r"},
+                                        columns={code_right: "acc_z_r"},
                                         inplace=True,
                                     )
                                 case xgyro if "xGyro" in xgyro:
                                     data_csv.rename(
-                                        columns={code_right: insole + "_gyro_y_r"},
+                                        columns={code_right: "gyro_x_r"},
                                         inplace=True,
                                     )
-                                    # Inverse axis
-                                    data_csv[insole + "_gyro_y_r"] = -data_csv[
-                                        insole + "_gyro_y_r"
-                                    ].astype(float)
 
                                 case ygyro if "yGyro" in ygyro:
                                     data_csv.rename(
-                                        columns={code_right: insole + "_gyro_x_r"},
+                                        columns={code_right: "gyro_y_r"},
                                         inplace=True,
                                     )
                                 case zgyro if "zGyro" in zgyro:
                                     data_csv.rename(
-                                        columns={code_right: insole + "_gyro_z_r"},
+                                        columns={code_right: "gyro_z_r"},
                                         inplace=True,
                                     )
                         case insole_right if (
@@ -319,81 +311,73 @@ class DataLoadsol:
                             match insole_right:
                                 case lat if "lateral" in lat:
                                     data_csv.rename(
-                                        columns={insole_right: insole + "_f_lateral_r"},
+                                        columns={insole_right: "f_lateral_r"},
                                         inplace=True,
                                     )
                                 case med if "medial" in med:
                                     data_csv.rename(
-                                        columns={insole_right: insole + "_f_medial_r"},
+                                        columns={insole_right: "f_medial_r"},
                                         inplace=True,
                                     )
                                 case heel if "heel" in heel:
                                     data_csv.rename(
-                                        columns={insole_right: insole + "_f_heel_r"},
+                                        columns={insole_right: "f_heel_r"},
                                         inplace=True,
                                     )
                                 case tot if (
                                     insole in tot and "-R" in tot and ":" not in tot
                                 ):
                                     data_csv.rename(
-                                        columns={insole_right: insole + "_f_total_r"},
+                                        columns={insole_right: "f_total_r"},
                                         inplace=True,
                                     )
                                 case xacc if "xAcc" in xacc:
                                     data_csv.rename(
-                                        columns={insole_right: insole + "_acc_y_r"},
+                                        columns={insole_right: "acc_x_r"},
                                         inplace=True,
                                     )
-                                    # Inverse axis
-                                    data_csv[insole + "_acc_y_r"] = -data_csv[
-                                        insole + "_acc_y_r"
-                                    ].astype(float)
 
                                 case yacc if "yAcc" in yacc:
                                     data_csv.rename(
-                                        columns={insole_right: insole + "_acc_x_r"},
+                                        columns={insole_right: "acc_y_r"},
                                         inplace=True,
                                     )
                                 case zacc if "zAcc" in zacc:
                                     data_csv.rename(
-                                        columns={insole_right: insole + "_acc_z_r"},
+                                        columns={insole_right: "acc_z_r"},
                                         inplace=True,
                                     )
                                 case xgyro if "xGyro" in xgyro:
                                     data_csv.rename(
-                                        columns={insole_right: insole + "_gyro_y_r"},
+                                        columns={insole_right: "gyro_x_r"},
                                         inplace=True,
                                     )
-                                    # Inverse axis
-                                    data_csv[insole + "_gyro_y_r"] = -data_csv[
-                                        insole + "_gyro_y_r"
-                                    ].astype(float)
 
                                 case ygyro if "yGyro" in ygyro:
                                     data_csv.rename(
-                                        columns={insole_right: insole + "_gyro_x_r"},
+                                        columns={insole_right: "gyro_y_r"},
                                         inplace=True,
                                     )
                                 case zgyro if "zGyro" in zgyro:
                                     data_csv.rename(
-                                        columns={insole_right: insole + "_gyro_z_r"},
+                                        columns={insole_right: "gyro_z_r"},
                                         inplace=True,
                                     )
                         case code_left if insoles_codes[insole]["code_left"] in code_left:
                             match code_left:
                                 case lat if "lateral" in lat:
                                     data_csv.rename(
-                                        columns={code_left: insole + "_f_lateral_l"},
+                                        columns={code_left: "f_lateral_l"},
                                         inplace=True,
                                     )
                                 case med if "medial" in med:
                                     data_csv.rename(
-                                        columns={code_left: insole + "_f_medial_l"},
+                                        columns={code_left: "f_medial_l"},
                                         inplace=True,
                                     )
                                 case heel if "heel" in heel:
                                     data_csv.rename(
-                                        columns={code_left: insole + "_f_heel_l"},
+                                        columns={code_left: "f_heel_l"},
                                         inplace=True,
                                     )
                                 case tot if (
@@ -401,111 +385,95 @@ class DataLoadsol:
                                     and ":" not in tot
                                 ):
                                     data_csv.rename(
-                                        columns={code_left: insole + "_f_total_l"},
+                                        columns={code_left: "f_total_l"},
                                         inplace=True,
                                     )
                                 case xacc if "xAcc" in xacc:
                                     data_csv.rename(
-                                        columns={code_left: insole + "_acc_y_l"},
+                                        columns={code_left: "acc_x_l"},
                                         inplace=True,
                                     )
-                                    # Inverse axis
-                                    data_csv[insole + "_acc_y_l"] = -data_csv[
-                                        insole + "_acc_y_l"
-                                    ].astype(float)
 
                                 case yacc if "yAcc" in yacc:
                                     data_csv.rename(
-                                        columns={code_left: insole + "_acc_x_l"},
+                                        columns={code_left: "acc_y_l"},
                                         inplace=True,
                                     )
                                 case zacc if "zAcc" in zacc:
                                     data_csv.rename(
-                                        columns={code_left: insole + "_acc_z_l"},
+                                        columns={code_left: "acc_z_l"},
                                         inplace=True,
                                     )
                                 case xgyro if "xGyro" in xgyro:
                                     data_csv.rename(
-                                        columns={code_left: insole + "_gyro_y_l"},
+                                        columns={code_left: "gyro_x_l"},
                                         inplace=True,
                                     )
-                                    # Inverse axis
-                                    data_csv[insole + "_gyro_y_l"] = -data_csv[
-                                        insole + "_gyro_y_l"
-                                    ].astype(float)
 
                                 case ygyro if "yGyro" in ygyro:
                                     data_csv.rename(
-                                        columns={code_left: insole + "_gyro_x_l"},
+                                        columns={code_left: "gyro_y_l"},
                                         inplace=True,
                                     )
                                 case zgyro if "zGyro" in zgyro:
                                     data_csv.rename(
-                                        columns={code_left: insole + "_gyro_z_l"},
+                                        columns={code_left: "gyro_z_l"},
                                         inplace=True,
                                     )
                         case insole_left if insole in insole_left and "-L" in insole_left:
                             match insole_left:
                                 case lat if "lateral" in lat:
                                     data_csv.rename(
-                                        columns={insole_left: insole + "_f_lateral_l"},
+                                        columns={insole_left: "f_lateral_l"},
                                         inplace=True,
                                     )
                                 case med if "medial" in med:
                                     data_csv.rename(
-                                        columns={insole_left: insole + "_f_medial_l"},
+                                        columns={insole_left: "f_medial_l"},
                                         inplace=True,
                                     )
                                 case heel if "heel" in heel:
                                     data_csv.rename(
-                                        columns={insole_left: insole + "_f_heel_l"},
+                                        columns={insole_left: "f_heel_l"},
                                         inplace=True,
                                     )
                                 case tot if (
                                     insole in tot and "-L" in tot and ":" not in tot
                                 ):
                                     data_csv.rename(
-                                        columns={insole_left: insole + "_f_total_l"},
+                                        columns={insole_left: "f_total_l"},
                                         inplace=True,
                                     )
                                 case xacc if "xAcc" in xacc:
                                     data_csv.rename(
-                                        columns={insole_left: insole + "_acc_y_l"},
+                                        columns={insole_left: "acc_x_l"},
                                         inplace=True,
                                     )
-                                    # Inverse axis
-                                    data_csv[insole + "_acc_y_l"] = -data_csv[
-                                        insole + "_acc_y_l"
-                                    ].astype(float)
 
                                 case yacc if "yAcc" in yacc:
                                     data_csv.rename(
-                                        columns={insole_left: insole + "_acc_x_l"},
+                                        columns={insole_left: "acc_y_l"},
                                         inplace=True,
                                     )
                                 case zacc if "zAcc" in zacc:
                                     data_csv.rename(
-                                        columns={insole_left: insole + "_acc_z_l"},
+                                        columns={insole_left: "acc_z_l"},
                                         inplace=True,
                                     )
                                 case xgyro if "xGyro" in xgyro:
                                     data_csv.rename(
-                                        columns={insole_left: insole + "_gyro_y_l"},
+                                        columns={insole_left: "gyro_x_l"},
                                         inplace=True,
                                     )
-                                    # Inverse axis
-                                    data_csv[insole + "_gyro_y_l"] = -data_csv[
-                                        insole + "_gyro_y_l"
-                                    ].astype(float)
 
                                 case ygyro if "yGyro" in ygyro:
                                     data_csv.rename(
-                                        columns={insole_left: insole + "_gyro_x_l"},
+                                        columns={insole_left: "gyro_y_l"},
                                         inplace=True,
                                     )
                                 case zgyro if "zGyro" in zgyro:
                                     data_csv.rename(
-                                        columns={insole_left: insole + "_gyro_z_l"},
+                                        columns={insole_left: "gyro_z_l"},
                                         inplace=True,
                                     )
 
@@ -516,16 +484,14 @@ class DataLoadsol:
                     match key:
                         case right if (
                             "Unnamed" in right
-                            and insole in data_csv.keys()[index + 1]
                             and "_r" in data_csv.keys()[index + 1]
                         ):
-                            data_csv.rename(columns={key: insole + "_time_r"}, inplace=True)
+                            data_csv.rename(columns={key: "time_r"}, inplace=True)
                         case left if (
                             "Unnamed" in left
-                            and insole in data_csv.keys()[index + 1]
                             and "_l" in data_csv.keys()[index + 1]
                         ):
-                            data_csv.rename(columns={key: insole + "_time_l"}, inplace=True)
+                            data_csv.rename(columns={key: "time_l"}, inplace=True)
 
         elif state == "curated":
             data_csv = pd.read_csv(
@@ -555,177 +521,176 @@ class DataLoadsol:
         # Initialize cleaned data
         cleaned_data = deepcopy(self.raw_data)
 
-        for insole in self.insoles:
-            # Total number of frames before cleaning
-            total_frames = len(cleaned_data)
+        # Total number of frames before cleaning
+        total_frames = len(cleaned_data)
 
-            # Indexes of incorrect values
-            indexes_incorrect_values_l = self.raw_data[
-                self.raw_data[insole + "_f_heel_l"] == -1
-            ].index.tolist()
+        # Indexes of incorrect values
+        indexes_incorrect_values_l = self.raw_data[
+            self.raw_data["f_heel_l"] == -1
+        ].index.tolist()
 
-            indexes_incorrect_values_r = self.raw_data[
-                self.raw_data[insole + "_f_heel_r"] == -1
-            ].index.tolist()
+        indexes_incorrect_values_r = self.raw_data[
+            self.raw_data["f_heel_r"] == -1
+        ].index.tolist()
 
-            # Proportion of incorrect values compared to the total number of frames
-            incorrect_frames_l = len(indexes_incorrect_values_l)
-            incorrect_frames_r = len(indexes_incorrect_values_r)
+        # Proportion of incorrect values compared to the total number of frames
+        incorrect_frames_l = len(indexes_incorrect_values_l)
+        incorrect_frames_r = len(indexes_incorrect_values_r)
 
-            print(f"Number of incorrect frames ({insole} left): {incorrect_frames_l}")
-            print(f"Number of incorrect frames ({insole} right): {incorrect_frames_r}")
+        print(f"Number of incorrect frames (left): {incorrect_frames_l}")
+        print(f"Number of incorrect frames (right): {incorrect_frames_r}")
 
-            proportion_incorrect_frames_l = np.round(
-                (incorrect_frames_l / total_frames) * 100, 1
-            )
-            proportion_incorrect_frames_r = np.round(
-                (incorrect_frames_r / total_frames) * 100, 1
-            )
+        proportion_incorrect_frames_l = np.round(
+            (incorrect_frames_l / total_frames) * 100, 1
+        )
+        proportion_incorrect_frames_r = np.round(
+            (incorrect_frames_r / total_frames) * 100, 1
+        )
 
-            print(
-                f"Proportion of incorrect frames ({insole} left): {proportion_incorrect_frames_l} %"
-            )
-            print(
-                f"Proportion of incorrect frames ({insole} right): {proportion_incorrect_frames_r} %"
-            )
+        print(
+            f"Proportion of incorrect frames (left): {proportion_incorrect_frames_l} %"
+        )
+        print(
+            f"Proportion of incorrect frames (right): {proportion_incorrect_frames_r} %"
+        )
 
-            # Columns names
-            names_l = {
-                insole + "_f_heel_l",
-                insole + "_f_medial_l",
-                insole + "_f_lateral_l",
-                insole + "_f_total_l",
-            }
-            names_r = {
-                insole + "_f_heel_r",
-                insole + "_f_medial_r",
-                insole + "_f_lateral_r",
-                insole + "_f_total_r",
-            }
+        # Columns names
+        names_l = {
+            "f_heel_l",
+            "f_medial_l",
+            "f_lateral_l",
+            "f_total_l",
+        }
+        names_r = {
+            "f_heel_r",
+            "f_medial_r",
+            "f_lateral_r",
+            "f_total_r",
+        }
 
-            # Replace by nan incorrect values
-            for name_l, name_r in zip(names_l, names_r):
-                cleaned_data.loc[indexes_incorrect_values_l, name_l] = np.nan
-                cleaned_data.loc[indexes_incorrect_values_r, name_r] = np.nan
+        # Replace by nan incorrect values
+        for name_l, name_r in zip(names_l, names_r):
+            cleaned_data.loc[indexes_incorrect_values_l, name_l] = np.nan
+            cleaned_data.loc[indexes_incorrect_values_r, name_r] = np.nan
 
-            # Indexes of duplicate time data
-            duplicate_l = cleaned_data[insole + "_time_l"][
-                cleaned_data[insole + "_time_l"].duplicated() == True
-            ].index
+        # Indexes of duplicate time data
+        duplicate_l = cleaned_data["time_l"][
+            cleaned_data["time_l"].duplicated() == True
+        ].index
 
-            duplicate_r = cleaned_data[insole + "_time_r"][
-                cleaned_data[insole + "_time_r"].duplicated() == True
-            ].index
+        duplicate_r = cleaned_data["time_r"][
+            cleaned_data["time_r"].duplicated() == True
+        ].index
 
-            # Proportion of duplicate values compared to the total number of frames
-            duplicate_frames_l = len(duplicate_l)
-            duplicate_frames_r = len(duplicate_r)
+        # Proportion of duplicate values compared to the total number of frames
+        duplicate_frames_l = len(duplicate_l)
+        duplicate_frames_r = len(duplicate_r)
 
-            print(f"Number of incorrect frames ({insole} left): {duplicate_frames_l}")
-            print(f"Number of incorrect frames ({insole} right): {duplicate_frames_r}")
+        print(f"Number of incorrect frames (left): {duplicate_frames_l}")
+        print(f"Number of incorrect frames (right): {duplicate_frames_r}")
 
-            proportion_duplicate_frames_l = np.round(
-                (duplicate_frames_l / total_frames) * 100, 1
-            )
-            proportion_duplicate_frames_r = np.round(
-                (duplicate_frames_r / total_frames) * 100, 1
-            )
+        proportion_duplicate_frames_l = np.round(
+            (duplicate_frames_l / total_frames) * 100, 1
+        )
+        proportion_duplicate_frames_r = np.round(
+            (duplicate_frames_r / total_frames) * 100, 1
+        )
 
-            print(
-                f"Proportion of incorrect frames ({insole} left): {proportion_duplicate_frames_l} %"
-            )
-            print(
-                f"Proportion of incorrect frames ({insole} right): {proportion_duplicate_frames_r} %"
-            )
+        print(
+            f"Proportion of incorrect frames (left): {proportion_duplicate_frames_l} %"
+        )
+        print(
+            f"Proportion of incorrect frames (right): {proportion_duplicate_frames_r} %"
+        )
 
-            # Indexes of data to be suppressed (the duplicate data to be suppressed is the one immediately before the previously identified data)
-            index_duplicate_l = duplicate_l - 1
-            index_duplicate_r = duplicate_r - 1
+        # Indexes of data to be suppressed (the duplicate data to be suppressed is the one immediately before the previously identified data)
+        index_duplicate_l = duplicate_l - 1
+        index_duplicate_r = duplicate_r - 1
 
-            # Columns names
-            names_left = {
-                insole + "_time_l",
-                insole + "_f_heel_l",
-                insole + "_f_medial_l",
-                insole + "_f_lateral_l",
-                insole + "_f_total_l",
-                insole + "_acc_x_l",
-                insole + "_acc_y_l",
-                insole + "_acc_z_l",
-                insole + "_gyro_x_l",
-                insole + "_gyro_y_l",
-                insole + "_gyro_z_l",
-            }
+        # Columns names
+        names_left = {
+            "time_l",
+            "f_heel_l",
+            "f_medial_l",
+            "f_lateral_l",
+            "f_total_l",
+            "acc_x_l",
+            "acc_y_l",
+            "acc_z_l",
+            "gyro_x_l",
+            "gyro_y_l",
+            "gyro_z_l",
+        }
 
-            names_right = {
-                insole + "_time_r",
-                insole + "_f_heel_r",
-                insole + "_f_medial_r",
-                insole + "_f_lateral_r",
-                insole + "_f_total_r",
-                insole + "_acc_x_r",
-                insole + "_acc_y_r",
-                insole + "_acc_z_r",
-                insole + "_gyro_x_r",
-                insole + "_gyro_y_r",
-                insole + "_gyro_z_r",
-            }
+        names_right = {
+            "time_r",
+            "f_heel_r",
+            "f_medial_r",
+            "f_lateral_r",
+            "f_total_r",
+            "acc_x_r",
+            "acc_y_r",
+            "acc_z_r",
+            "gyro_x_r",
+            "gyro_y_r",
+            "gyro_z_r",
+        }
 
-            # Supress duplicate time values and other values associated
-            for name_left, name_right in zip(names_left, names_right):
-                cleaned_data.loc[index_duplicate_l, name_left] = np.nan
-                cleaned_data.loc[index_duplicate_r, name_right] = np.nan
+        # Supress duplicate time values and other values associated
+        for name_left, name_right in zip(names_left, names_right):
+            cleaned_data.loc[index_duplicate_l, name_left] = np.nan
+            cleaned_data.loc[index_duplicate_r, name_right] = np.nan
 
-            self.cleaned_data = cleaned_data
+        self.cleaned_data = cleaned_data
 
-            # Identify the indexes of NaN values
-            nan_indexes_l = cleaned_data[insole + "_f_total_l"].isna()
-            nan_indexes_r = cleaned_data[insole + "_f_total_r"].isna()
+        # Identify the indexes of NaN values
+        nan_indexes_l = cleaned_data["f_total_l"].isna()
+        nan_indexes_r = cleaned_data["f_total_r"].isna()
 
-            # Identify NaN ranges with an unique identificator
-            nan_range_l = (nan_indexes_l != nan_indexes_l.shift()).cumsum()
-            nan_range_r = (nan_indexes_r != nan_indexes_r.shift()).cumsum()
+        # Identify NaN ranges with an unique identificator
+        nan_range_l = (nan_indexes_l != nan_indexes_l.shift()).cumsum()
+        nan_range_r = (nan_indexes_r != nan_indexes_r.shift()).cumsum()
 
-            # Keep only the groups of consecutive NaN
-            nan_blocks_l = cleaned_data[nan_indexes_l].groupby(nan_range_l)
-            nan_blocks_r = cleaned_data[nan_indexes_r].groupby(nan_range_r)
+        # Keep only the groups of consecutive NaN
+        nan_blocks_l = cleaned_data[nan_indexes_l].groupby(nan_range_l)
+        nan_blocks_r = cleaned_data[nan_indexes_r].groupby(nan_range_r)
 
-            # Compute the duration of each block
-            durations_l = []
-            for _, group in nan_blocks_l:
-                # Start and end indexes of the block
-                start_idx = group.index.min()
-                end_idx = group.index.max()
+        # Compute the duration of each block
+        durations_l = []
+        for _, group in nan_blocks_l:
+            # Start and end indexes of the block
+            start_idx = group.index.min()
+            end_idx = group.index.max()
 
-                # Use known data before and after to estimate duration
-                if start_idx > 0 and end_idx + 1 < len(cleaned_data):
-                    t_start = cleaned_data.loc[start_idx - 1, insole + "_time_l"]
-                    t_end = cleaned_data.loc[end_idx + 1, insole + "_time_l"]
-                    if pd.notna(t_start) and pd.notna(t_end):
-                        durations_l.append(t_end - t_start)
+            # Use known data before and after to estimate duration
+            if start_idx > 0 and end_idx + 1 < len(cleaned_data):
+                t_start = cleaned_data.loc[start_idx - 1, "time_l"]
+                t_end = cleaned_data.loc[end_idx + 1, "time_l"]
+                if pd.notna(t_start) and pd.notna(t_end):
+                    durations_l.append(t_end - t_start)
 
-            durations_r = []
-            for _, group in nan_blocks_r:
-                # Start and end indexes of the block
-                start_idx = group.index.min()
-                end_idx = group.index.max()
+        durations_r = []
+        for _, group in nan_blocks_r:
+            # Start and end indexes of the block
+            start_idx = group.index.min()
+            end_idx = group.index.max()
 
-                # Use known data before and after to estimate duration
-                if start_idx > 0 and end_idx + 1 < len(cleaned_data):
-                    t_start = cleaned_data.loc[start_idx - 1, insole + "_time_r"]
-                    t_end = cleaned_data.loc[end_idx + 1, insole + "_time_r"]
-                    if pd.notna(t_start) and pd.notna(t_end):
-                        durations_r.append(t_end - t_start)
+            # Use known data before and after to estimate duration
+            if start_idx > 0 and end_idx + 1 < len(cleaned_data):
+                t_start = cleaned_data.loc[start_idx - 1, "time_r"]
+                t_end = cleaned_data.loc[end_idx + 1, "time_r"]
+                if pd.notna(t_start) and pd.notna(t_end):
+                    durations_r.append(t_end - t_start)
 
-            mean_duration_l = np.round(np.mean(durations_l), 2) if durations_l else 0
-            mean_duration_r = np.round(np.mean(durations_r), 2) if durations_r else 0
+        mean_duration_l = np.round(np.mean(durations_l), 2) if durations_l else 0
+        mean_duration_r = np.round(np.mean(durations_r), 2) if durations_r else 0
 
-            print(
-                f"Mean duration of removed data ({insole+" left"}): {mean_duration_l} s"
-            )
-            print(
-                f"Mean duration of removed data ({insole+" right"}): {mean_duration_r} s"
-            )
+        print(
+            f"Mean duration of removed data (left): {mean_duration_l} s"
+        )
+        print(
+            f"Mean duration of removed data (right): {mean_duration_r} s"
+        )
 
     def fill_missing_data(self):
         """Interpolates missing data."""
@@ -736,90 +701,89 @@ class DataLoadsol:
         # Initialize filled data
         filled_data = deepcopy(self.cleaned_data)
 
-        for insole in self.insoles:
-            # Rename Time column and suppress time_r
-            filled_data.drop(columns=[insole + "_time_r"], inplace=True)
-            filled_data.rename(
-                columns={insole + "_time_l": insole + "_time"}, inplace=True
-            )
+        # Rename Time column and suppress time_r
+        filled_data.drop(columns=["time_r"], inplace=True)
+        filled_data.rename(
+            columns={"time_l": "time"}, inplace=True
+        )
 
-            # Truncate lines if there are nan values at the end of the DataFrame
-            while filled_data.iloc[-1].isna().any():
-                filled_data.drop(filled_data.index[-1], axis=0, inplace=True)
+        # Truncate lines if there are nan values at the end of the DataFrame
+        while filled_data.iloc[-1].isna().any():
+            filled_data.drop(filled_data.index[-1], axis=0, inplace=True)
 
-            # Interpolate time if there is missing data (due to duplicate data suppressed)
-            filled_data[insole + "_time"] = filled_data[insole + "_time"].interpolate(
-                method="linear"
-            )
+        # Interpolate time if there is missing data (due to duplicate data suppressed)
+        filled_data["time"] = filled_data["time"].interpolate(
+            method="linear"
+        )
 
-            # Columns to interpolate
-            col_to_interpol_l = [
-                insole + "_f_heel_l",
-                insole + "_f_medial_l",
-                insole + "_f_lateral_l",
-                insole + "_f_total_l",
-                insole + "_acc_x_l",
-                insole + "_acc_y_l",
-                insole + "_acc_z_l",
-                insole + "_gyro_x_l",
-                insole + "_gyro_y_l",
-                insole + "_gyro_z_l",
-            ]
+        # Columns to interpolate
+        col_to_interpol_l = [
+            "f_heel_l",
+            "f_medial_l",
+            "f_lateral_l",
+            "f_total_l",
+            "acc_x_l",
+            "acc_y_l",
+            "acc_z_l",
+            "gyro_x_l",
+            "gyro_y_l",
+            "gyro_z_l",
+        ]
 
-            col_to_interpol_r = [
-                insole + "_f_heel_r",
-                insole + "_f_medial_r",
-                insole + "_f_lateral_r",
-                insole + "_f_total_r",
-                insole + "_acc_x_r",
-                insole + "_acc_y_r",
-                insole + "_acc_z_r",
-                insole + "_gyro_x_r",
-                insole + "_gyro_y_r",
-                insole + "_gyro_z_r",
-            ]
+        col_to_interpol_r = [
+            "f_heel_r",
+            "f_medial_r",
+            "f_lateral_r",
+            "f_total_r",
+            "acc_x_r",
+            "acc_y_r",
+            "acc_z_r",
+            "gyro_x_r",
+            "gyro_y_r",
+            "gyro_z_r",
+        ]
 
-            for col in col_to_interpol_l:
-                known = filled_data[col].notna()
-                x_l = filled_data.loc[known, insole + "_time"]
-                y_l = filled_data.loc[known, col]
+        for col in col_to_interpol_l:
+            known = filled_data[col].notna()
+            x_l = filled_data.loc[known, "time"]
+            y_l = filled_data.loc[known, col]
 
-                # Create interpolator (spline)
-                interp = PchipInterpolator(x_l, y_l)
+            # Create interpolator (spline)
+            interp = PchipInterpolator(x_l, y_l)
 
-                # Interpolate
-                filled_data[col] = interp(filled_data[insole + "_time"])
+            # Interpolate
+            filled_data[col] = interp(filled_data["time"])
 
-                # Constraint to avoid force negative values
-                if col in [
-                    insole + "_f_heel_l",
-                    insole + "_f_medial_l",
-                    insole + "_f_lateral_l",
-                    insole + "_f_total_l",
-                ]:
-                    filled_data[col] = filled_data[col].clip(lower=0)
+            # Constraint to avoid force negative values
+            if col in [
+                "f_heel_l",
+                "f_medial_l",
+                "f_lateral_l",
+                "f_total_l",
+            ]:
+                filled_data[col] = filled_data[col].clip(lower=0)
 
-            for col in col_to_interpol_r:
-                known = filled_data[col].notna()
-                x_r = filled_data.loc[known, insole + "_time"]
-                y_r = filled_data.loc[known, col]
+        for col in col_to_interpol_r:
+            known = filled_data[col].notna()
+            x_r = filled_data.loc[known, "time"]
+            y_r = filled_data.loc[known, col]
 
-                # Create interpolator (spline)
-                interp = PchipInterpolator(x_r, y_r)
+            # Create interpolator (spline)
+            interp = PchipInterpolator(x_r, y_r)
 
-                # Interpolate
-                filled_data[col] = interp(filled_data[insole + "_time"])
+            # Interpolate
+            filled_data[col] = interp(filled_data["time"])
 
-                # Constraint to avoid force negative values
-                if col in [
-                    insole + "_f_heel_r",
-                    insole + "_f_medial_r",
-                    insole + "_f_lateral_r",
-                    insole + "_f_total_r",
-                ]:
-                    filled_data[col] = filled_data[col].clip(lower=0)
+            # Constraint to avoid force negative values
+            if col in [
+                "f_heel_r",
+                "f_medial_r",
+                "f_lateral_r",
+                "f_total_r",
+            ]:
+                filled_data[col] = filled_data[col].clip(lower=0)
 
-            self.filled_data = filled_data
+        self.filled_data = filled_data
 
     def cut_data(self, data: pd.DataFrame, path: str, file: str, row: str, trial: str):
         """Cuts signal around the scrummaging (between the instruction "Crouch" to the final whistle blast).
@@ -858,13 +822,12 @@ class DataLoadsol:
         # Reset index
         data_cut.reset_index(drop=True, inplace=True)
 
-        # Redefine time (one for all insoles)
-        insole = self.insoles[0]
-        new_time = data_cut[insole + "_time"] - data_cut[insole + "_time"][0]
+        # Redefine time
+        new_time = data_cut["time"] - data_cut["time"][0]
         data_cut.insert(loc=0, column="time", value=new_time)
 
         for insole in self.insoles:
-            data_cut.drop(insole + "_time", axis=1, inplace=True)
+            data_cut.drop(insole + "time", axis=1, inplace=True)
 
         self.data_cut = data_cut
 
@@ -883,20 +846,19 @@ class DataLoadsol:
         # Initialise downsampled data
         downsampled_data = pd.DataFrame()
 
-        for insole in self.insoles:
-            # Create new time vector based on the final frequency
-            t_ds = np.arange(
-                data[insole + "_time"].iloc[0],
-                data[insole + "_time"].iloc[-1],
-                1 / final_frequency,
-            )
+        # Create new time vector based on the final frequency
+        t_ds = np.arange(
+            data["time"].iloc[0],
+            data["time"].iloc[-1],
+            1 / final_frequency,
+        )
 
-            for key in data.keys():
-                # Create interpolation function
-                f = interp1d(data[insole + "_time"], data.get(key))
+        for key in data.keys():
+            # Create interpolation function
+            f = interp1d(data["time"], data.get(key))
 
-                # Downsample data
-                downsampled_data[key] = f(t_ds)
+            # Downsample data
+            downsampled_data[key] = f(t_ds)
 
         self.downsampled_data = downsampled_data
 
@@ -948,107 +910,43 @@ class DataLoadsol:
 
         # Apply correction to still have the sum of the force on each area equal to the total value, even after filtering
         col_corrected = pd.DataFrame()
-        for insole in self.insoles:
-            for side in ["_l", "_r"]:
-                cols = [
-                    insole + "_f_heel" + side,
-                    insole + "_f_medial" + side,
-                    insole + "_f_lateral" + side,
-                ]
+        for side in ["_l", "_r"]:
+            cols = [
+                "f_heel" + side,
+                "f_medial" + side,
+                "f_lateral" + side,
+            ]
 
-                total_col = insole + "_f_total" + side
+            total_col = "f_total" + side
 
-                # Replace NaN values by zero (division by zero so NaN values) and compute the sum on the three areas
-                sum_cols = self.filtered_data[cols].sum(axis=1).replace(0, np.nan)
+            # Replace NaN values by zero (division by zero so NaN values) and compute the sum on the three areas
+            sum_cols = self.filtered_data[cols].sum(axis=1).replace(0, np.nan)
 
-                # Apply correction
-                col_corrected[cols] = (
-                    self.filtered_data[cols]
-                    .multiply(self.filtered_data[total_col], axis=0)
-                    .div(sum_cols, axis=0)
-                ).fillna(0.0)
+            # Apply correction
+            col_corrected[cols] = (
+                self.filtered_data[cols]
+                .multiply(self.filtered_data[total_col], axis=0)
+                .div(sum_cols, axis=0)
+            ).fillna(0.0)
 
-                # Find the max value between the three areas fo each line
-                max_value = col_corrected[cols].idxmax(axis=1)
+            # Find the max value between the three areas fo each line
+            max_value = col_corrected[cols].idxmax(axis=1)
 
-                # Round all values on the columns
-                for col in cols:
-                    col_corrected[col] = col_corrected[col].round(2)
+            # Round all values on the columns
+            for col in cols:
+                col_corrected[col] = col_corrected[col].round(2)
 
-                # Apply correction
-                for i, row in col_corrected.iterrows():
-                    max_col = max_value[i]
-                    other_cols = [c for c in cols if c != max_col]
-                    col_corrected.at[i, max_col] = (
-                        self.filtered_data.at[i, total_col] - row[other_cols].sum()
-                    )
-
-                # Attribute new corrected values to the filtered data
-                self.filtered_data[cols] = col_corrected[cols].round(2)
-
-    def compute_repartition(self, data: pd.DataFrame):
-        """Computes the percentage of effort on each area of the insoles.
-
-        Args:
-            data (pd.DataFrame): DataFrame to use to compute the repartition of the efforts
-        """
-
-        # Initialization
-        percentages = {
-            insole + "_" + area + "_rate" + side: []
-            for insole in self.insoles
-            for area in ["heel", "medial", "lateral"]
-            for side in ["_l", "_r"]
-        }
-
-        # Compute percentages
-        for insole in self.insoles:
-            for side in ["_l", "_r"]:
-                percentages[insole + "_heel_rate" + side] = (
-                    data[insole + "_f_heel" + side]
-                    * 100
-                    / data[insole + "_f_total" + side]
-                )
-                percentages[insole + "_medial_rate" + side] = (
-                    data[insole + "_f_medial" + side]
-                    * 100
-                    / data[insole + "_f_total" + side]
-                )
-                percentages[insole + "_lateral_rate" + side] = (
-                    data[insole + "_f_lateral" + side]
-                    * 100
-                    / data[insole + "_f_total" + side]
+            # Apply correction
+            for i, row in col_corrected.iterrows():
+                max_col = max_value[i]
+                other_cols = [c for c in cols if c != max_col]
+                col_corrected.at[i, max_col] = (
+                    self.filtered_data.at[i, total_col] - row[other_cols].sum()
                 )
 
-        # Convert the dictionnary into a DataFrame
-        percentages = pd.DataFrame(percentages)
+            # Attribute new corrected values to the filtered data
+            self.filtered_data[cols] = col_corrected[cols].round(2)
 
-        # Add percentages to the complete DataFrame
-        data[percentages.columns] = percentages
-
-        # Replace NaN values by zero (division by zero, so NaN)
-        for column in percentages.keys():
-            data.fillna({column: 0.0}, inplace=True)
-
-            # Round percentages
-            data[column] = round(data[column], 2)
-
-        # Apply correction to guarantee that the sum is equal to 100
-        for insole in self.insoles:
-            for side in ["_l", "_r"]:
-                cols = [
-                    insole + "_heel_rate" + side,
-                    insole + "_medial_rate" + side,
-                    insole + "_lateral_rate" + side,
-                ]
-
-                # Arrondi des 2 premières colonnes
-                data[cols[:2]] = data[cols[:2]].round(2)
-
-                # Dernière colonne = 100 - somme des deux premières
-                data[cols[2]] = 100 - data[cols[:2]].sum(axis=1)
-
-        self.final_data = data
 
     def export_pre_treated_data(self, data: pd.DataFrame, path: str, name: str):
         """Exports the DataFrame containing the pre-treated data to a csv file.
