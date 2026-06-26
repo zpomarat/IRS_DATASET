@@ -147,24 +147,16 @@ class DataPreTreatment:
         axs[1].legend()
         plt.show()
 
-    def synchro_LS_FP(self, trial: str, ls_state: str, fp_state, path_indexes:str):
+    def synchro_LS_FP(self, ls_state: str, fp_state, idx_synchro_ls:int, idx_synchro_fp:int):
         """Synchronizes the Loadsol signals on the Forceplates signals based on indexes of interest previously identified.
 
         Args:
             trial (str): name of the trial to synchro (the name must correspond to that indicated in the yaml file containing the indexes of interest)
         """
 
-        # Read hte yaml file coontaining the indexes of interest
-        cdir = os.getcwd()
-
-        with open(
-            path_indexes, "r"
-        ) as file:
-            indexes_synchro = yaml.safe_load(file)
-
-        # Define index of interest (first pic of the first jump)
-        ls_idx = indexes_synchro[trial]["jump1_ls"][0]
-        fp_idx = indexes_synchro[trial]["jump1_fp"][0]
+        # Define index of interest
+        ls_idx = int(idx_synchro_ls)
+        fp_idx = int(idx_synchro_fp)
 
         # Define a range of interest (+/-0.5s) around the point of interest and create a new reduced signal on this range
         if ls_state == "filled" and fp_state == "pre_processed":
@@ -388,24 +380,16 @@ class DataPreTreatment:
         plt.legend()
         plt.show()
 
-    def cut_signal(self, trial: str,downsample_fp:str):
+    def cut_signal(self,idx_start:int,idx_end:int,downsample_fp:str):
         """Cut the signal to keep only the part of interest (between the jumps used for synchro)
 
         Args:
             trial (str): Name of the trial to process.
         """
 
-        # Read the yaml file containing the indexes of interest
-        cdir = os.getcwd()
-
-        with open(
-            os.path.abspath(os.path.join(cdir, "pre_processing","utils","indexes_synchro.yaml")), "r"
-        ) as file:
-            indexes_cut = yaml.safe_load(file)
-
         # Cut signal based on the LS frequency
-        start = indexes_cut[trial]["start_ls"]
-        end = indexes_cut[trial]["end_ls"]
+        start = idx_start
+        end = idx_end
 
         t_start = (self.total_shift + start) / self.data_ls.frequency
         t_end = (self.total_shift + end) / self.data_ls.frequency
@@ -416,11 +400,6 @@ class DataPreTreatment:
             ]
         )
         if downsample_fp == "True":
-            # fp_cut = deepcopy(
-            #     self.data_fp.downsampled_data[
-            #         (self.total_shift + start) : (self.total_shift + end)
-            #     ]
-            # )
             fp_cut = deepcopy(
                 self.data_fp.downsampled_data[
                     (self.data_fp.downsampled_data["time"] >= t_start) &
@@ -439,39 +418,22 @@ class DataPreTreatment:
         ls_cut.reset_index(drop=True, inplace=True)
         fp_cut.reset_index(drop=True, inplace=True)
 
-        # Reset time
-        # new_time = (
-        #     ls_cut["time"]
-        #     - ls_cut["time"][0]
-        # )
-
-        # ls_cut["time"] = new_time
-        # fp_cut["time"] = new_time
-
         ls_cut["time"] = ls_cut["time"] - ls_cut["time"].iloc[0]
         fp_cut["time"] = fp_cut["time"] - fp_cut["time"].iloc[0]
 
         self.data_ls.cut_data = ls_cut
         self.data_fp.cut_data = fp_cut
 
-    def cut_signal_thrust_only(self, trial: str, downsample_fp:str):
+    def cut_signal_thrust_only(self, idx_start:int,idx_end:int, downsample_fp:str):
         """Cut the signal to keep only the part of interest (corresponding to the thrust)
 
         Args:
             trial (str): Name of the trial to process.
         """
 
-        # Read the yaml file containing the indexes of interest
-        cdir = os.getcwd()
-
-        with open(
-            os.path.abspath(os.path.join(cdir, "pre_processing","utils","indexes_synchro.yaml")), "r"
-        ) as file:
-            indexes_cut = yaml.safe_load(file)
-
         # Cut signal based on the LS frequency
-        start = indexes_cut[trial]["start_scrum"]
-        end = indexes_cut[trial]["end_scrum"]
+        start = idx_start
+        end = idx_end
 
         t_start = start / self.data_ls.frequency
         t_end = end / self.data_ls.frequency
@@ -496,15 +458,6 @@ class DataPreTreatment:
         # Reset index
         ls_cut.reset_index(drop=True, inplace=True)
         fp_cut.reset_index(drop=True, inplace=True)
-
-        # Reset time
-        # new_time = (
-        #     ls_cut["time"]
-        #     - ls_cut["time"][0]
-        # )
-
-        # ls_cut["time"] = new_time
-        # fp_cut["time"] = new_time
 
         ls_cut["time"] = ls_cut["time"] - ls_cut["time"].iloc[0]
         fp_cut["time"] = fp_cut["time"] - fp_cut["time"].iloc[0]
