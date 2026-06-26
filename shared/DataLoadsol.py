@@ -181,15 +181,16 @@ class DataLoadsol:
                   time_right, f_heel_r, f_medial_r, f_lateral_r, f_tot_r, acc_x_r, acc_y_r, acc_z_r, gyro_x_r, gyro_y_r, gyro_z_r.
         """
 
-        if os.path.isfile(self.path_csv) == False and self.csv_file_created == False:
-            self.convert_txt_to_csv()
-            self.csv_file_created = True
-
-        if os.path.isfile(self.path_csv) == False:
-            raise ValueError("The csv file does not exist.")
 
         # Read the csv file as a Dataframe
         if state == "raw":
+            if os.path.isfile(self.path_csv) == False and self.csv_file_created == False:
+                self.convert_txt_to_csv()
+                self.csv_file_created = True
+
+            if os.path.isfile(self.path_csv) == False:
+                raise ValueError("The csv file does not exist.")
+
             data_csv = pd.read_csv(
                 self.path_csv, sep=",", header=2, na_values="-", dtype=str
             )
@@ -494,6 +495,9 @@ class DataLoadsol:
                             data_csv.rename(columns={key: "time_l"}, inplace=True)
 
         elif state == "curated":
+            if not os.path.isfile(self.path_csv):
+                raise ValueError(f"Curated file not found: {self.path_csv}")
+        
             data_csv = pd.read_csv(
                 self.path_csv, sep=",", header=0, na_values="-", dtype=str
             )
