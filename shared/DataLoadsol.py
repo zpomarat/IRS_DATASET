@@ -705,10 +705,10 @@ class DataLoadsol:
         # Initialize filled data
         filled_data = deepcopy(self.cleaned_data)
 
-        # Rename Time column and suppress time_r
-        filled_data.drop(columns=["time_r"], inplace=True)
+        # Rename Time column and suppress time_l
+        filled_data.drop(columns=["time_l"], inplace=True)
         filled_data.rename(
-            columns={"time_l": "time"}, inplace=True
+            columns={"time_r": "time"}, inplace=True
         )
 
         # Truncate lines if there are nan values at the end of the DataFrame
