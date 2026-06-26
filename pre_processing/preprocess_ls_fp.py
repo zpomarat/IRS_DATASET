@@ -58,9 +58,7 @@ data_ls_fp = DataPreTreatment(
     fp_state="curated",
 )
 
-# data_ls_fp.data_ls.fill_missing_data()
-# data_ls_fp.data_fp.pre_process_data()
-
+# Synchronize signals
 data_ls_fp.synchro_LS_FP(
     trial="S14T01",
     ls_state="curated",
@@ -70,6 +68,12 @@ data_ls_fp.synchro_LS_FP(
     ),
 )
 
-data_ls_fp.plot_synchro_data(time=True)
+# data_ls_fp.plot_synchro_data(time=True)
+
+data_ls_fp.downsample(signal="FP",final_frequency=200)
+
+# Cut signals around the pushing phase
+data_ls_fp.cut_signal_thrust_only(trial="S14T01",downsample_fp=True)
+data_ls_fp.plot_cut_data(signal="thrust")
 
 print()
