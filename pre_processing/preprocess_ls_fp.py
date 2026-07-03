@@ -41,8 +41,7 @@ with open(
 # Forceplates numbers used during each session [left,right]
 fp_number = {"session_1": [1, 2], "session_2": [2, 5]}
 
-# trial_test = "S14_T01"
-SESSION = "session_2"
+# # Filter trials for current session only
 
 for _, trial in trials.iterrows():
     # Create DataPreTreatment object
@@ -50,12 +49,12 @@ for _, trial in trials.iterrows():
         ls_path=path_ls_curated,
         ls_filename=trial.subject_id + "_"+ trial.trial_id + "_ls",
         ls_frequency=200,
-        insoles=insoles_correspondance["S14"]["insole_code"],
+        insoles=insoles_correspondance[trial.subject_id]["insole_code"],
         ls_state="curated",
         fp_path=path_fp_curated,
         fp_filename=trial.subject_id + "_"+ trial.trial_id + "_fp",
         fp_frequency=1000,
-        forceplates=fp_number[SESSION],
+        forceplates=fp_number[f"session_{trial.session}"],
         fp_state="curated",
     )
 
@@ -67,11 +66,11 @@ for _, trial in trials.iterrows():
         idx_synchro_fp=trial.idx_sync_fp
     )
 
-    # data_ls_fp.plot_synchro_data(time=True)
+    data_ls_fp.plot_synchro_data(time=True)
 
     # data_ls_fp.downsample(signal="FP",final_frequency=200)
 
     # Cut signals around the pushing phase
-    data_ls_fp.cut_signal(idx_start=int(trial.idx_start_push_loadsol),idx_end=int(trial.idx_end_push_loadsol),downsample_fp=False)
-    data_ls_fp.plot_cut_data(signal="whole")
+    # data_ls_fp.cut_signal(idx_start=int(trial.idx_start_push_loadsol),idx_end=int(trial.idx_end_push_loadsol),downsample_fp=False)
+    # data_ls_fp.plot_cut_data(signal="whole")
 
