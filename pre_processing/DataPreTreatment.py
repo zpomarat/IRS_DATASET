@@ -158,6 +158,8 @@ class DataPreTreatment:
         ls_idx = int(idx_synchro_ls)
         fp_idx = int(idx_synchro_fp)
 
+        coarse_shift = int(fp_idx / 5 - ls_idx)
+
         # Define a range of interest (+/-0.5s) around the point of interest and create a new reduced signal on this range
         if ls_state == "filled" and fp_state == "pre_processed":
             ls_reduced = deepcopy(
@@ -180,6 +182,10 @@ class DataPreTreatment:
                 self.data_fp.raw_data["fz_r"][fp_idx - 500 : fp_idx + 500]
             ).values
 
+        # Normaliser les deux signaux entre 0 et 1
+        ls_reduced = (ls_reduced - np.min(ls_reduced)) / (np.max(ls_reduced) - np.min(ls_reduced))
+        fp_reduced = (fp_reduced - np.min(fp_reduced)) / (np.max(fp_reduced) - np.min(fp_reduced))
+
         # Resample the LS reduced signal to the frequency of the FP signal
         n_samples = int(len(ls_reduced) * (1000 / 200))
         ls_resampled = resample(ls_reduced, n_samples)
@@ -188,7 +194,10 @@ class DataPreTreatment:
         corr = correlate(ls_resampled, fp_reduced, mode="full")
         lags = np.arange(-len(fp_reduced) + 1, len(fp_reduced))
 
-        optimal_shift = int(lags[np.argmax(corr)])
+        optimal_shift_fp = int(lags[np.argmax(corr)])
+        optimal_shift_ls = int(np.round(optimal_shift_fp * 200 / 1000))
+
+        self.total_shift = coarse_shift + optimal_shift_ls
 
         # Create a new synchronized signal
         if ls_state == "filled" and fp_state == "pre_processed":
@@ -197,16 +206,6 @@ class DataPreTreatment:
         elif ls_state == "curated" and fp_state == "curated":
             self.data_ls.data_synchro = deepcopy(self.data_ls.raw_data)
             self.data_fp.data_synchro = deepcopy(self.data_fp.raw_data)
-
-        # Apply the shift to the new synchronized signal
-        # Number of data to add
-        nb = int(ceil(np.abs(optimal_shift * 200 / 1000)))
-
-        # Shift between ls and fp indexes of interest
-        shift = int(fp_idx / 5 - ls_idx)
-
-        # Total shift to apply to ls signal
-        self.total_shift = nb + shift
 
         # Create a matrix with zeros of the length of nb
         data_to_add = np.zeros((self.total_shift, self.data_ls.data_synchro.shape[1]))
@@ -221,37 +220,8 @@ class DataPreTreatment:
             [data_to_add, self.data_ls.data_synchro], ignore_index=True
         )
 
-        # Compute new time taking account of the frequency (round to inferior last time value to the frequency precision)
-        new_last_time = (
-            np.floor(
-                (
-                    self.data_ls.data_synchro["time_r"].iloc[
-                        -1
-                    ]
-                    + np.abs(self.total_shift) / self.data_ls.frequency
-                )
-                * self.data_ls.frequency
-            )
-            / self.data_ls.frequency
-        )
-
-        new_frame_number = int(
-            np.round(
-                (
-                    self.data_ls.data_synchro["time_r"].iloc[
-                        -1
-                    ]
-                    + np.abs(self.total_shift) / self.data_ls.frequency
-                )
-                * 200
-            )
-        )
-
-        self.data_ls.data_synchro["time"] = np.linspace(
-            0,
-            new_last_time,
-            new_frame_number + 1,
-        )
+        # Compute new time        
+        self.data_ls.data_synchro["time"] = self.data_ls.data_synchro.index/self.data_ls.frequency
 
     def plot_synchro_data(self, time: bool):
         """Plot the signals of interest of both insoles and forceplates data after synchronization and downsampling."""
@@ -423,6 +393,18 @@ class DataPreTreatment:
 
         self.data_ls.cut_data = ls_cut
         self.data_fp.cut_data = fp_cut
+
+        # Suppress time_l and r
+        self.data_ls.cut_data.drop(columns=["time_r", "time_l"], inplace=True)
+
+        # Put "time" column in first position
+        cols = ["time"] + [col for col in self.data_ls.cut_data.columns if col != "time"]
+        self.data_ls.cut_data = self.data_ls.cut_data[cols]
+
+        # Cut longest signal to the size of the smallest one
+        t_min_end = min(ls_cut["time"].iloc[-1], fp_cut["time"].iloc[-1])
+        self.data_ls.cut_data = self.data_ls.cut_data[self.data_ls.cut_data["time"] <= t_min_end]
+        self.data_fp.cut_data = self.data_fp.cut_data[self.data_fp.cut_data["time"] <= t_min_end]
 
     def cut_signal_thrust_only(self, idx_start:int,idx_end:int, downsample_fp:str):
         """Cut the signal to keep only the part of interest (corresponding to the thrust)
@@ -782,3 +764,13 @@ class DataPreTreatment:
         ]
 
         self.merged_data = data_merged
+
+    def export_processed_data(self, data: pd.DataFrame, path: str, name: str):
+        """Exports the DataFrame containing the curated data to a csv file.
+
+        Args:
+            path (str): path of the directory to save the csv file.
+            name (str): name of the csv file to save.
+        """
+
+        data.to_csv(os.path.abspath(os.path.join(path, name + ".csv")))
