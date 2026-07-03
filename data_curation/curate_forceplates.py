@@ -90,7 +90,7 @@ for _, trial in trials_session.iterrows():
                     f"fz{fp_number[SESSION][0]}": forceplates.pre_processed_data[f"fz{fp_number[SESSION][0]}"],
                     f"fx{fp_number[SESSION][1]}": - forceplates.pre_processed_data[f"fy{fp_number[SESSION][1]}"],
                     f"fy{fp_number[SESSION][1]}": forceplates.pre_processed_data[f"fx{fp_number[SESSION][1]}"],
-                    f"fz{fp_number[SESSION][1]}": forceplates.pre_processed_data[f"fz{fp_number[SESSION][0]}"],
+                    f"fz{fp_number[SESSION][1]}": forceplates.pre_processed_data[f"fz{fp_number[SESSION][1]}"],
                 }
                 unified_forceplates = pd.DataFrame(unified_forceplates)
 
