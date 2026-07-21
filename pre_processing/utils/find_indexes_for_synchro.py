@@ -159,18 +159,19 @@ def plot_fp_data(fp_data: pd.DataFrame, trial_name: str):
 
     fig.tight_layout()
 
-# Exclude ls_S08_T04: almost half a=of the trial is missing for left insole
+# Exclude ls_S08_T04: almost half of the trial is missing for left insole
 trial_to_exclude= "S08_T04"
 
-for _, trial in trials.iterrows():
-    trial_name = f"{trial.subject_id}_{trial.trial_id}"
+# for _, trial in trials.iterrows():
+#     trial_name = f"{trial.subject_id}_{trial.trial_id}"
 
-    # Plot forceplates si disponible
-    if trial_name in fp_dict:
-        plot_fp_data(fp_data=fp_dict[trial_name].raw_data, trial_name=trial_name)
+trial_name = "S23_T01"
+# Plot forceplates si disponible
+if trial_name in fp_dict:
+    plot_fp_data(fp_data=fp_dict[trial_name].raw_data, trial_name=trial_name)
 
-    # Plot loadsol si disponible
-    if trial_name in ls_dict and trial_name != trial_to_exclude:
-        plot_loadsol_data(loadsol_data=ls_dict[trial_name].raw_data, trial_name=trial_name)
+# Plot loadsol si disponible
+if trial_name in ls_dict and trial_name != trial_to_exclude:
+    plot_loadsol_data(loadsol_data=ls_dict[trial_name].raw_data, trial_name=trial_name)
 
-    plt.show()
+plt.show()
