@@ -20,11 +20,6 @@ path_indexes_synchro_cut = os.path.abspath(
 path_save_ls = os.path.abspath(os.path.join(cdir, "..", "data", "processed", "loadsol"))
 path_save_fp = os.path.abspath(os.path.join(cdir, "..", "data", "processed", "forceplates"))
 
-# Open file containing indexes for synchro and cutting
-with open(
-    os.path.abspath(os.path.join(path_indexes_synchro_cut, "indexes_synchro.yaml")), "r"
-) as f:
-    indexes_synchro = yaml.safe_load(f)
 
 # Load trial list
 trials = pd.read_csv(
@@ -36,7 +31,7 @@ trials = pd.read_csv(
 )
 
 # Convert numbers into int (taking account for NaN)
-cols_to_exclude = ["subject_id", "trial_id","session","fp_available","loadsol_available","video_left_available","video_right_available","notes"]
+cols_to_exclude = ["subject_id", "trial_id","session","fp_available","loadsol_available","video_left_available","video_right_available","video_calib","notes"]
 cols_idx = [c for c in trials.columns if c not in cols_to_exclude]
 trials[cols_idx] = trials[cols_idx].astype(float)
 
@@ -76,11 +71,11 @@ for _, trial in trials.iterrows():
             idx_synchro_fp=trial.idx_sync_fp
         )
         # data_ls_fp.downsample(signal="FP",final_frequency=200)
-        data_ls_fp.plot_synchro_data(time=True)
+        # data_ls_fp.plot_synchro_data(time=True)
 
         # Cut signals around the pushing phase
         data_ls_fp.cut_signal(idx_start=int(trial.idx_start_push_loadsol),idx_end=int(trial.idx_end_push_loadsol),downsample_fp=False)
-        data_ls_fp.plot_cut_data(signal="whole")
+        # data_ls_fp.plot_cut_data(signal="whole")
 
         # Export synchro and cut loadsol and forceplates signals
         data_ls_fp.export_processed_data(data=data_ls_fp.data_ls.cut_data,path=path_save_ls,name=f"{trial.subject_id}_{trial.trial_id}_ls")
