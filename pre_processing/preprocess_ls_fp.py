@@ -31,7 +31,7 @@ trials = pd.read_csv(
 )
 
 # Convert numbers into int (taking account for NaN)
-cols_to_exclude = ["subject_id", "trial_id","session","fp_available","loadsol_available","video_left_available","video_right_available","video_calib","notes"]
+cols_to_exclude = ["subject_id", "trial_id","session","fp_available","loadsol_available","video_left_available","video_right_available","video_calib","calib_inner_corners","calib_square_size_mm","notes"]
 cols_idx = [c for c in trials.columns if c not in cols_to_exclude]
 trials[cols_idx] = trials[cols_idx].astype(float)
 
